@@ -1,0 +1,82 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  extensions = [pgvector]
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  displayName   String?
+  avatarUrl     String?  // From Google profile
+  googleId      String?  @unique
+  preferences   Json     @default("{}")
+  encryptionSalt String  // For TEE key derivation
+  conversations Conversation[]
+  tasks         Task[]
+  moodEntries   MoodEntry[]
+  createdAt     DateTime @default(now())
+}
+
+model Conversation {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  title           String?
+  encryptedTranscript  Bytes   // TEE-encrypted
+  summary         String?
+  flowType        String   // brain_dump, quick_vent, morning_checkin
+  durationSeconds Int?
+  overallSentiment Float?
+  categories      String[]
+  embedding       Unsupported("vector(1536)")?
+  metadata        Json     @default("{}")
+  tasks           Task[]
+  moodEntries     MoodEntry[]
+  createdAt       DateTime @default(now())
+}
+
+model Task {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  conversationId  String?
+  conversation    Conversation? @relation(fields: [conversationId], references: [id])
+  title           String
+  description     String?
+  category        String?
+  priority        String   @default("medium")
+  status          String   @default("pending")
+  dueDate         DateTime?
+  people          String[]
+  reminders       Reminder[]
+  createdAt       DateTime @default(now())
+}
+
+model MoodEntry {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  conversationId  String?
+  conversation    Conversation? @relation(fields: [conversationId], references: [id])
+  score           Float
+  emotions        String[]
+  triggers        String[]
+  notes           String?
+  createdAt       DateTime @default(now())
+}
+
+model Reminder {
+  id            String   @id @default(uuid())
+  taskId        String
+  task          Task     @relation(fields: [taskId], references: [id])
+  message       String
+  scheduledAt   DateTime
+  isSent        Boolean  @default(false)
+  reminderType  String   @default("task")
+}
