@@ -1,2 +1,10 @@
-// Entry point for UI design-system components (Buttons, Cards, Inputs, etc.)
-export {};
+export { FadeInView } from './FadeInView';
+export { PillBadge } from './PillBadge';
+export { PrimaryButton } from './PrimaryButton';
+export { FeatureRow } from './FeatureRow';
+export { FloatingHeader } from './FloatingHeader';
+export { ScreenShell } from './ScreenShell';
+export { SectionHeading } from './SectionHeading';
+export { SessionPreviewStack } from './SessionPreviewStack';
+export { HeroDecor } from './HeroDecor';
+export { SurfaceCard } from './SurfaceCard';

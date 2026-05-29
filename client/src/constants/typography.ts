@@ -7,6 +7,13 @@ export const typography = {
     xl: 20,
     xxl: 24,
     xxxl: 32,
+    /** Acctual-style display headlines */
+    display: 36,
+    displaySm: 28,
+  },
+  letterSpacing: {
+    tight: -0.5,
+    tighter: -1,
   },
   lineHeights: {
     xs: 16,

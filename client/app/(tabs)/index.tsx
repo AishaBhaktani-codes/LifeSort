@@ -1,30 +1,220 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
+import { Mic, Heart, History, Sparkles } from 'lucide-react-native';
+import {
+  ScreenShell,
+  FloatingHeader,
+  PillBadge,
+  SectionHeading,
+  PrimaryButton,
+  HeroDecor,
+  FadeInView,
+} from '../../src/components/ui';
+import { QuickActionCard, StatPill } from '../../src/components/dashboard';
+import { colors } from '../../src/constants/colors';
+import { images } from '../../src/constants/images';
+import { useAuthStore } from '../../src/store/authStore';
 
 export default function DashboardScreen() {
+  const router = useRouter();
+  const user = useAuthStore((s) => s.user);
+  const displayName =
+    user?.email?.split('@')[0] ?? 'there';
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Dashboard</Text>
-      <Text style={styles.subtitle}>Welcome back to LifeSort</Text>
-    </View>
+    <ScreenShell
+      header={
+        <>
+          <HeroDecor variant="dashboard" />
+          <FloatingHeader
+            title="LifeSort"
+            right={
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>
+                  {displayName.charAt(0).toUpperCase()}
+                </Text>
+              </View>
+            }
+          />
+        </>
+      }
+    >
+      <View style={styles.heroBanner}>
+        <FadeInView delay={100}>
+          <Image
+            source={{ uri: images.hero.journal }}
+            style={styles.bannerImage}
+            contentFit="cover"
+            transition={300}
+          />
+        </FadeInView>
+        <View style={styles.heroOverlay}>
+          <FadeInView delay={140}>
+            <PillBadge>Welcome back, {displayName}</PillBadge>
+          </FadeInView>
+          <FadeInView delay={180}>
+            <Text style={styles.heroTitle}>What’s on your mind today?</Text>
+            <Text style={styles.heroSub}>
+              Your voice companion is ready. Tap below to start a session.
+            </Text>
+          </FadeInView>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <FadeInView delay={220}>
+          <PrimaryButton
+            label="Start a voice session"
+            onPress={() => router.push('/(tabs)/conversation')}
+          />
+        </FadeInView>
+      </View>
+
+      <View style={styles.statsRow}>
+        <StatPill label="Sessions" value="—" delay={260} />
+        <StatPill label="Mood avg" value="—" highlight="this week" delay={300} />
+        <StatPill label="Tasks" value="—" delay={340} />
+      </View>
+
+      <View style={styles.section}>
+        <SectionHeading
+          delay={380}
+          eyebrow="Quick actions"
+          title="Designed for how you actually live"
+          subtitle="Pick a flow — brain dump, vent, or morning check-in."
+          size="md"
+        />
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.carousel}
+        >
+          <QuickActionCard
+            title="Voice"
+            description="Speak freely. Get tasks and empathetic replies."
+            icon={Mic}
+            imageUri={images.cards.voice}
+            accentColor={colors.light.primary}
+            delay={400}
+            onPress={() => router.push('/(tabs)/conversation')}
+          />
+          <QuickActionCard
+            title="Mood"
+            description="Track patterns and emotional climate over time."
+            icon={Heart}
+            imageUri={images.cards.mood}
+            accentColor={colors.light.accent}
+            delay={460}
+            onPress={() => router.push('/(tabs)/mood')}
+          />
+          <QuickActionCard
+            title="History"
+            description="Review past conversations and digests."
+            icon={History}
+            imageUri={images.cards.tasks}
+            delay={520}
+            onPress={() => router.push('/(tabs)/history')}
+          />
+        </ScrollView>
+      </View>
+
+      <View style={styles.section}>
+        <FadeInView delay={560}>
+          <Pressable
+            style={styles.quoteCard}
+            onPress={() => router.push('/(tabs)/conversation')}
+          >
+            <Sparkles size={20} color={colors.light.primary} />
+            <Text style={styles.quote}>
+              “LifeSort turns scattered thoughts into structure — in under a
+              minute.”
+            </Text>
+            <Text style={styles.quoteAuthor}>Your daily companion</Text>
+          </Pressable>
+        </FadeInView>
+      </View>
+    </ScreenShell>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
+  avatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.light.primaryMuted,
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
+    justifyContent: 'center',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1F2937',
+  avatarText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.light.primaryDark,
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#64748B',
-    marginTop: 8,
+  heroBanner: {
+    marginHorizontal: 20,
+    marginTop: 12,
+    borderRadius: 24,
+    overflow: 'hidden',
+    height: 200,
+    backgroundColor: colors.light.surfaceElevated,
+  },
+  bannerImage: {
+    ...StyleSheet.absoluteFill,
+  },
+  heroOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    padding: 20,
+    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+  },
+  heroTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginTop: 10,
+    letterSpacing: -0.3,
+  },
+  heroSub: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.85)',
+    marginTop: 6,
+    lineHeight: 20,
+  },
+  section: {
+    paddingHorizontal: 20,
+    marginTop: 24,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    paddingHorizontal: 20,
+    marginTop: 24,
+  },
+  carousel: {
+    paddingRight: 20,
+    paddingBottom: 4,
+  },
+  quoteCard: {
+    backgroundColor: colors.light.surface,
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: colors.light.border,
+    gap: 12,
+  },
+  quote: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: colors.light.text,
+    lineHeight: 26,
+    fontStyle: 'italic',
+  },
+  quoteAuthor: {
+    fontSize: 13,
+    color: colors.light.textSecondary,
+    fontWeight: '600',
   },
 });
