@@ -1,9 +1,14 @@
 import { Redirect } from 'expo-router';
+import { useAuthStore } from '../src/store/authStore';
 
 export default function Index() {
-  // Direct entry points redirect to the auth screen by default.
-  // In a real flow, this would check if the user is authenticated.
-  const isAuthenticated = false;
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isLoading = useAuthStore((state) => state.isLoading);
+
+  if (isLoading) {
+    // A splash screen or simple view could go here while we check auth
+    return null;
+  }
 
   if (!isAuthenticated) {
     return <Redirect href="/(auth)/login" />;
