@@ -1,28 +1,46 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '../store/authStore';
+import { supabase } from '../lib/supabase';
+import { Alert } from 'react-native';
 
 export function useAuth() {
-  const { user, isAuthenticated, setUser, setToken, logout } = useAuthStore();
+  const { user, session, isAuthenticated, isLoading, setSession } = useAuthStore();
   const [loading, setLoading] = useState(false);
-
-  const loginWithGoogle = async () => {
-    setLoading(true);
-    // Google Sign-In logic using expo-auth-session and Supabase goes here
-    setLoading(false);
-  };
 
   const loginWithEmail = async (email: string, password: string) => {
     setLoading(true);
-    // Email Sign-In logic using Supabase goes here
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) Alert.alert('Error', error.message);
     setLoading(false);
+  };
+
+  const signUpWithEmail = async (email: string, password: string) => {
+    setLoading(true);
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    if (error) Alert.alert('Error', error.message);
+    else Alert.alert('Success', 'Check your email for the confirmation link!');
+    setLoading(false);
+  };
+
+  const logout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) Alert.alert('Error', error.message);
   };
 
   return {
     user,
+    session,
     isAuthenticated,
+    isStoreLoading: isLoading,
     loading,
-    loginWithGoogle,
     loginWithEmail,
+    signUpWithEmail,
     logout,
   };
 }
