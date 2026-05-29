@@ -43,3 +43,11 @@ export interface MoodEntry {
   notes?: string;
   createdAt: string;
 }
+
+export interface ConversationUploadResponse {
+  conversation: Conversation;
+  transcript: string;
+  aiResponse: string;
+  tasks: Task[];
+  mood: MoodEntry | null;
+}
