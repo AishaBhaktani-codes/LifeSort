@@ -1,2 +1,2 @@
-// Entry point for Dashboard features (CategoryCards, QuickActions list, etc.)
-export {};
+export { QuickActionCard } from './QuickActionCard';
+export { StatPill } from './StatPill';

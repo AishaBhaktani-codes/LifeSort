@@ -1,5 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, ActivityIndicator, SafeAreaView } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  ActivityIndicator,
+} from 'react-native';
 import { Lock, Brain, Flame, Sun, AlertCircle } from 'lucide-react-native';
 import { useAudioRecorder } from '../../src/hooks/useAudioRecorder';
 import { useConversation } from '../../src/hooks/useConversation';
@@ -8,6 +14,12 @@ import {
   WaveformVisualizer,
   SessionResultsView,
 } from '../../src/components/voice';
+import {
+  ScreenShell,
+  FloatingHeader,
+  PillBadge,
+  FadeInView,
+} from '../../src/components/ui';
 import { colors } from '../../src/constants/colors';
 
 export default function ConversationScreen() {
@@ -43,65 +55,58 @@ export default function ConversationScreen() {
   };
 
   // If a session has results, display the SessionResultsView
+  const teeBadge = (
+    <View style={styles.teeBadge}>
+      <Lock size={12} color={colors.light.primary} />
+      <Text style={styles.teeBadgeText}>TEE Encrypted</Text>
+    </View>
+  );
+
   if (activeTranscript && activeAiResponse) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.container}>
-          {/* Header */}
-          <View style={styles.header}>
-            <View>
-              <Text style={styles.headerTitle}>LifeSort</Text>
-              <Text style={styles.headerSubtitle}>Conversational Companion</Text>
-            </View>
-            <View style={styles.teeBadge}>
-              <Lock size={12} color="#10B981" />
-              <Text style={styles.teeBadgeText}>TEE Encrypted</Text>
-            </View>
-          </View>
-
-          <SessionResultsView
-            transcript={activeTranscript}
-            aiResponse={activeAiResponse}
-            tasks={activeTasks}
-            mood={activeMood}
-            onClear={clearActiveSession}
-          />
-        </View>
-      </SafeAreaView>
+      <ScreenShell scroll={false} contentStyle={styles.shellContent}>
+        <FloatingHeader
+          title="LifeSort"
+          subtitle="Session results"
+          right={teeBadge}
+        />
+        <SessionResultsView
+          transcript={activeTranscript}
+          aiResponse={activeAiResponse}
+          tasks={activeTasks}
+          mood={activeMood}
+          onClear={clearActiveSession}
+        />
+      </ScreenShell>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.headerTitle}>LifeSort</Text>
-            <Text style={styles.headerSubtitle}>Conversational Companion</Text>
-          </View>
-          <View style={styles.teeBadge}>
-            <Lock size={12} color="#10B981" />
-            <Text style={styles.teeBadgeText}>TEE Encrypted</Text>
-          </View>
-        </View>
+    <ScreenShell scroll={false} contentStyle={styles.shellContent}>
+      <FloatingHeader
+        title="LifeSort"
+        subtitle="Conversational companion"
+        right={teeBadge}
+      />
 
         {/* Processing State */}
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#10B981" />
-            <Text style={styles.loadingText}>Processing Audio Securely...</Text>
+            <ActivityIndicator size="large" color={colors.light.primary} />
+            <Text style={styles.loadingText}>Processing audio securely…</Text>
             <Text style={styles.loadingSubtext}>
               TEE encrypts your thoughts on-device. Generating empathetic insights and extracting tasks.
             </Text>
           </View>
         ) : (
           <View style={styles.mainContent}>
-            {/* Mode / Flow Selector (Only visible when not recording) */}
             {!isRecording && (
               <View style={styles.selectorSection}>
-                <Text style={styles.sectionLabel}>Select Conversation Mode</Text>
-                
+                <FadeInView delay={80}>
+                  <PillBadge>Choose your flow</PillBadge>
+                </FadeInView>
+                <Text style={styles.sectionLabel}>Conversation mode</Text>
+
                 <View style={styles.flowSelector}>
                   <Pressable
                     onPress={() => setFlowType('brain_dump')}
@@ -111,7 +116,7 @@ export default function ConversationScreen() {
                     ]}
                   >
                     <View style={[styles.iconWrapper, flowType === 'brain_dump' && styles.iconWrapperActive]}>
-                      <Brain size={24} color={flowType === 'brain_dump' ? '#10B981' : '#64748B'} />
+                      <Brain size={24} color={flowType === 'brain_dump' ? colors.light.primary : colors.light.textSecondary} />
                     </View>
                     <Text style={styles.flowCardTitle}>Brain Dump</Text>
                     <Text style={styles.flowCardDesc}>Organize scattered ideas into structured task lists.</Text>
@@ -125,7 +130,7 @@ export default function ConversationScreen() {
                     ]}
                   >
                     <View style={[styles.iconWrapper, flowType === 'quick_vent' && styles.iconWrapperActive]}>
-                      <Flame size={24} color={flowType === 'quick_vent' ? '#14B8A6' : '#64748B'} />
+                      <Flame size={24} color={flowType === 'quick_vent' ? colors.light.accent : colors.light.textSecondary} />
                     </View>
                     <Text style={styles.flowCardTitle}>Quick Vent</Text>
                     <Text style={styles.flowCardDesc}>Express frustrations and release emotional weight.</Text>
@@ -139,7 +144,7 @@ export default function ConversationScreen() {
                     ]}
                   >
                     <View style={[styles.iconWrapper, flowType === 'morning_checkin' && styles.iconWrapperActive]}>
-                      <Sun size={24} color={flowType === 'morning_checkin' ? '#F59E0B' : '#64748B'} />
+                      <Sun size={24} color={flowType === 'morning_checkin' ? colors.light.warning : colors.light.textSecondary} />
                     </View>
                     <Text style={styles.flowCardTitle}>Morning</Text>
                     <Text style={styles.flowCardDesc}>Establish positive daily intentions and focus.</Text>
@@ -184,55 +189,29 @@ export default function ConversationScreen() {
             </View>
           </View>
         )}
-      </View>
-    </SafeAreaView>
+    </ScreenShell>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  shellContent: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#F8FAFC',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-    backgroundColor: '#FFFFFF',
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#1F2937',
-    letterSpacing: -0.5,
-  },
-  headerSubtitle: {
-    fontSize: 12,
-    color: '#64748B',
-    marginTop: 2,
+    paddingBottom: 100,
   },
   teeBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ECFDF5',
+    backgroundColor: colors.light.badge,
     paddingVertical: 6,
     paddingHorizontal: 12,
-    borderRadius: 16,
+    borderRadius: 999,
     borderWidth: 1,
-    borderColor: '#A7F3D0',
+    borderColor: colors.light.primaryLight,
     gap: 6,
   },
   teeBadgeText: {
-    fontSize: 12,
-    color: '#047857',
+    fontSize: 11,
+    color: colors.light.badgeText,
     fontWeight: '600',
   },
   mainContent: {
@@ -244,57 +223,58 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   sectionLabel: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#64748B',
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.light.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+    marginTop: 12,
     marginBottom: 12,
   },
   flowSelector: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
   },
   flowCard: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    backgroundColor: colors.light.surface,
+    borderRadius: 20,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.light.border,
     alignItems: 'flex-start',
-    elevation: 1,
-    shadowColor: '#64748B',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowColor: colors.light.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    elevation: 2,
   },
   flowCardActive: {
-    borderColor: '#10B981',
-    backgroundColor: '#F0FDF4',
+    borderColor: colors.light.primary,
+    backgroundColor: colors.light.primaryMuted,
     borderWidth: 1.5,
   },
   iconWrapper: {
     width: 40,
     height: 40,
-    borderRadius: 10,
-    backgroundColor: '#F1F5F9',
+    borderRadius: 14,
+    backgroundColor: colors.light.surfaceElevated,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 10,
   },
   iconWrapperActive: {
-    backgroundColor: '#D1FAE5',
+    backgroundColor: colors.light.primaryLight,
   },
   flowCardTitle: {
     fontSize: 14,
-    fontWeight: 'bold',
-    color: '#1F2937',
+    fontWeight: '700',
+    color: colors.light.text,
     marginBottom: 4,
   },
   flowCardDesc: {
     fontSize: 11,
-    color: '#64748B',
+    color: colors.light.textSecondary,
     lineHeight: 15,
   },
   visualizerContainer: {
@@ -310,12 +290,13 @@ const styles = StyleSheet.create({
   timerText: {
     fontSize: 48,
     fontWeight: '300',
-    color: '#1F2937',
+    color: colors.light.text,
     fontVariant: ['tabular-nums'],
+    letterSpacing: -1,
   },
   recordingLabel: {
     fontSize: 14,
-    color: '#EF4444',
+    color: colors.light.error,
     fontWeight: '600',
     marginTop: 8,
   },
@@ -325,9 +306,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFBEB',
     borderWidth: 1,
     borderColor: '#FDE68A',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 999,
     marginTop: 10,
     gap: 6,
   },
@@ -342,25 +323,26 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   welcomeText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1F2937',
+    fontSize: 28,
+    fontWeight: '700',
+    color: colors.light.text,
     textAlign: 'center',
+    letterSpacing: -0.5,
   },
   welcomeSubtext: {
-    fontSize: 14,
-    color: '#64748B',
+    fontSize: 15,
+    color: colors.light.textSecondary,
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 22,
     marginTop: 10,
   },
   buttonContainer: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 8,
   },
   buttonLabel: {
     fontSize: 14,
-    color: '#64748B',
+    color: colors.light.textSecondary,
     fontWeight: '600',
     marginTop: 10,
   },
@@ -371,16 +353,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   loadingText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1F2937',
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.light.text,
     marginTop: 16,
+    letterSpacing: -0.3,
   },
   loadingSubtext: {
-    fontSize: 14,
-    color: '#64748B',
+    fontSize: 15,
+    color: colors.light.textSecondary,
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 22,
     marginTop: 8,
   },
 });
