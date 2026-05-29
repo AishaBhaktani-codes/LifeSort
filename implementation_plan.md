@@ -82,48 +82,55 @@ graph TB
 
 ```
 LifeSort/
-├── app/                          # Expo Router (routes only)
-│   ├── (auth)/
-│   │   ├── _layout.tsx
-│   │   ├── login.tsx             # Google Sign-In + email option
-│   │   └── signup.tsx
-│   ├── (tabs)/
-│   │   ├── _layout.tsx
-│   │   ├── index.tsx             # Dashboard
-│   │   ├── conversation.tsx      # Voice screen
-│   │   ├── history.tsx
-│   │   ├── mood.tsx
-│   │   └── settings.tsx
-│   ├── _layout.tsx               # Root layout + providers
-│   └── index.tsx                 # Entry redirect
-├── src/
-│   ├── components/
-│   │   ├── ui/                   # Button, Card, Input, etc.
-│   │   ├── voice/                # WaveformVisualizer, VoiceButton
-│   │   ├── dashboard/            # CategoryCard, QuickActions
-│   │   ├── mood/                 # MoodChart, MoodBadge
-│   │   └── common/               # Header, LoadingState, EmptyState
-│   ├── hooks/
-│   │   ├── useAudioRecorder.ts
-│   │   ├── useConversation.ts
-│   │   ├── useAuth.ts            # Google + email auth
-│   │   └── useMoodData.ts
-│   ├── lib/
-│   │   ├── supabase.ts           # Supabase client + Google OAuth config
-│   │   ├── api.ts
-│   │   └── storage.ts
-│   ├── store/                    # Zustand stores
-│   │   ├── authStore.ts
-│   │   ├── conversationStore.ts
-│   │   └── settingsStore.ts
-│   ├── constants/
-│   │   ├── colors.ts
-│   │   ├── typography.ts
-│   │   ├── spacing.ts
-│   │   └── animations.ts
-│   └── types/
-│       └── index.ts
-├── backend/
+├── client/                       # Expo Mobile App
+│   ├── app/                      # Expo Router (routes only)
+│   │   ├── (auth)/
+│   │   │   ├── _layout.tsx
+│   │   │   ├── login.tsx         # Google Sign-In + email option
+│   │   │   └── signup.tsx
+│   │   ├── (tabs)/
+│   │   │   ├── _layout.tsx
+│   │   │   ├── index.tsx         # Dashboard
+│   │   │   ├── conversation.tsx  # Voice screen
+│   │   │   ├── history.tsx
+│   │   │   ├── mood.tsx
+│   │   │   └── settings.tsx
+│   │   ├── _layout.tsx           # Root layout + providers
+│   │   └── index.tsx             # Entry redirect
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── ui/               # Button, Card, Input, etc.
+│   │   │   ├── voice/            # WaveformVisualizer, VoiceButton
+│   │   │   ├── dashboard/        # CategoryCard, QuickActions
+│   │   │   ├── mood/             # MoodChart, MoodBadge
+│   │   │   └── common/           # Header, LoadingState, EmptyState
+│   │   ├── hooks/
+│   │   │   ├── useAudioRecorder.ts
+│   │   │   ├── useConversation.ts
+│   │   │   ├── useAuth.ts        # Google + email auth
+│   │   │   └── useMoodData.ts
+│   │   ├── lib/
+│   │   │   ├── supabase.ts       # Supabase client + Google OAuth config
+│   │   │   ├── api.ts
+│   │   │   └── storage.ts
+│   │   ├── store/                # Zustand stores
+│   │   │   ├── authStore.ts
+│   │   │   ├── conversationStore.ts
+│   │   │   └── settingsStore.ts
+│   │   ├── constants/
+│   │   │   ├── colors.ts
+│   │   │   ├── typography.ts
+│   │   │   ├── spacing.ts
+│   │   │   └── animations.ts
+│   │   └── types/
+│   │       └── index.ts
+│   ├── assets/
+│   ├── global.css
+│   ├── app.json
+│   ├── metro.config.js
+│   ├── postcss.config.mjs
+│   └── package.json
+├── server/                       # Node.js Backend
 │   ├── src/
 │   │   ├── server.js
 │   │   ├── config/
@@ -163,12 +170,6 @@ LifeSort/
 │   ├── package.json
 │   ├── Dockerfile
 │   └── docker-compose.yml         # PostgreSQL + pgvector local
-├── assets/
-├── global.css
-├── app.json
-├── metro.config.js
-├── postcss.config.mjs
-└── package.json
 ```
 
 ---
@@ -183,7 +184,7 @@ LifeSort/
 - Configure NativeWind v5, Expo Router, env vars
 
 #### [NEW] Node.js Backend Init
-- Express project in `backend/` with ES modules
+- Express project in `server/` with ES modules
 - Install: `express`, `prisma`, `@prisma/client`, `openai`, `multer`, `cors`, `helmet`, `express-rate-limit`, `node-cron`, `@supabase/supabase-js`, `jsonwebtoken`, `zod`
 - Docker Compose for local PostgreSQL 16 + pgvector extension
 
