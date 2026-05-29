@@ -1,2 +1,3 @@
-// Entry point for Voice/Audio recording components (WaveformVisualizer, VoiceButton, etc.)
-export {};
+export * from './VoiceButton';
+export * from './WaveformVisualizer';
+export * from './SessionResultsView';
