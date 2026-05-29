@@ -1,7 +1,7 @@
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  extensions = [pgvector]
+  extensions = [vector]
 }
 
 generator client {
@@ -15,8 +15,8 @@ model User {
   displayName   String?
   avatarUrl     String?  // From Google profile
   googleId      String?  @unique
-  preferences   Json     @default("{}")
-  encryptionSalt String  // For TEE key derivation
+  preferences   Json?    @default("{}")
+  encryptionSalt String  @default("default_salt_for_legacy_users") // For TEE key derivation
   conversations Conversation[]
   tasks         Task[]
   moodEntries   MoodEntry[]
