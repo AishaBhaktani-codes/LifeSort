@@ -1,5 +1,6 @@
 import { pipeline, env } from '@xenova/transformers';
-import { WaveFile } from 'wavefile';
+import wavefile from 'wavefile';
+const { WaveFile } = wavefile;
 import fs from 'fs';
 
 // Disable local models if you want to always pull from HF, or just leave default caching.
