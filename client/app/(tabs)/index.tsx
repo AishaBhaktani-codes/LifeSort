@@ -38,6 +38,16 @@ export default function DashboardScreen() {
     return score.toFixed(1);
   };
 
+  const sessionCountText =
+    stats.sessionCount === 0
+      ? 'No sessions yet ! Begin today !'
+      : stats.sessionCount.toString();
+
+  const taskCountText =
+    stats.pendingTaskCount === 0
+      ? 'No tasks remaining !!'
+      : stats.pendingTaskCount.toString();
+
   return (
     <ScreenShell
       header={
@@ -57,9 +67,9 @@ export default function DashboardScreen() {
       }
     >
       <View style={styles.heroBanner}>
-        <FadeInView delay={100}>
+        <FadeInView delay={100} style={styles.bannerImage} subtle>
           <Image
-            source={{ uri: images.hero.journal }}
+            source={require('../../assets/dashboard-marble-bg.png')}
             style={styles.bannerImage}
             contentFit="cover"
             transition={300}
@@ -67,7 +77,7 @@ export default function DashboardScreen() {
         </FadeInView>
         <View style={styles.heroOverlay}>
           <FadeInView delay={140}>
-            <PillBadge>Welcome back, {displayName}</PillBadge>
+            <PillBadge>Welcome {displayName} !</PillBadge>
           </FadeInView>
           <FadeInView delay={180}>
             <Text style={styles.heroTitle}>What’s on your mind today?</Text>
@@ -88,16 +98,16 @@ export default function DashboardScreen() {
       </View>
 
       <View style={styles.statsRow}>
-        <StatPill label="Sessions" value={stats.sessionCount.toString()} delay={260} />
+        <StatPill label="Sessions" value={sessionCountText} delay={260} />
         <StatPill label="Mood avg" value={formatMoodScore(stats.avgMoodScore)} highlight="this week" delay={300} />
-        <StatPill label="Tasks" value={stats.pendingTaskCount.toString()} delay={340} />
+        <StatPill label="Tasks" value={taskCountText} delay={340} />
       </View>
 
       <View style={styles.section}>
         <SectionHeading
           delay={380}
           eyebrow="Quick actions"
-          title="Designed for how you actually live"
+          title="Find calm and clarity in chaos !"
           subtitle="Pick a flow — brain dump, vent, or morning check-in."
           size="md"
         />
@@ -143,7 +153,7 @@ export default function DashboardScreen() {
           >
             <Sparkles size={20} color={colors.light.primary} />
             <Text style={styles.quote}>
-              “LifeSort turns scattered thoughts into structure — in under a
+              “LifeSort : Turn scattered thoughts into structure — in under a
               minute.”
             </Text>
             <Text style={styles.quoteAuthor}>Your daily companion</Text>
@@ -183,20 +193,25 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
     padding: 20,
-    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    // backgroundColor: 'rgba(241, 128, 226, 0.45)',
   },
   heroTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    fontFamily: 'DancingScript_700Bold',
+    fontSize: 42,
+    color: '#0c0c0c',
     marginTop: 10,
     letterSpacing: -0.3,
   },
   heroSub: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.85)',
+    //fontFamily: 'DancingScript_500Medium',
+    fontSize: 15,
+    fontWeight: '700',
+    color: 'rgba(12, 12, 12, 0.85)',
     marginTop: 6,
     lineHeight: 20,
+  },
+  bannerCursiveText: {
+    fontFamily: 'DancingScript_700Bold',
   },
   section: {
     paddingHorizontal: 20,

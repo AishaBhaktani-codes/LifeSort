@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { colors } from '../../constants/colors';
 
 export type BadgeVariant = 'blue' | 'pink' | 'yellow' | 'green' | 'purple' | 'neutral';
@@ -8,9 +8,10 @@ interface PillBadgeProps {
   children: ReactNode;
   variant?: BadgeVariant;
   style?: ViewStyle;
+  textStyle?: TextStyle;
 }
 
-export function PillBadge({ children, variant = 'blue', style }: PillBadgeProps) {
+export function PillBadge({ children, variant = 'blue', style, textStyle }: PillBadgeProps) {
   
   const getColors = () => {
     if (variant === 'neutral') {
@@ -27,7 +28,7 @@ export function PillBadge({ children, variant = 'blue', style }: PillBadgeProps)
 
   return (
     <View style={[styles.badge, { backgroundColor: bg }, style]}>
-      <Text style={[styles.text, { color: text }]}>
+      <Text style={[styles.text, { color: text }, textStyle]}>
         {children}
       </Text>
     </View>

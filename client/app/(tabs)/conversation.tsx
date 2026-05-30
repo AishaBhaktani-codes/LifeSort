@@ -169,7 +169,7 @@ export default function ConversationScreen() {
                 </View>
               ) : (
                 <View style={styles.welcomeContainer}>
-                  <Text style={styles.welcomeText}>What's on your mind?</Text>
+                  <Text style={styles.welcomeText}>Speak your heart out ! ❤️</Text>
                   <Text style={styles.welcomeSubtext}>
                     Select a mode, then tap the mic below to start. Your audio is analyzed inside a secure enclave and deleted immediately.
                   </Text>
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
   teeBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.light.badge,
+    backgroundColor: colors.light.primaryMuted,
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 999,
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
   },
   teeBadgeText: {
     fontSize: 11,
-    color: colors.light.badgeText,
+    color: colors.light.primary,
     fontWeight: '600',
   },
   mainContent: {

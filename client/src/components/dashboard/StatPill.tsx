@@ -11,10 +11,12 @@ interface StatPillProps {
 }
 
 export function StatPill({ label, value, highlight, delay = 0 }: StatPillProps) {
+  const isMessage = value.length > 8;
+
   return (
     <FadeInView delay={delay} style={styles.wrap}>
       <Text style={styles.label}>{label}</Text>
-      <Text style={styles.value}>
+      <Text style={[styles.value, isMessage && styles.messageValue]}>
         {value}
         {highlight != null && <Text style={styles.highlight}> {highlight}</Text>}
       </Text>
@@ -43,6 +45,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: colors.light.text,
+  },
+  messageValue: {
+    fontSize: 15,
+    lineHeight: 20,
   },
   highlight: {
     fontSize: 14,
