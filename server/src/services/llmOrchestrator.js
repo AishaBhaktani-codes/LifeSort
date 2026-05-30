@@ -1,33 +1,41 @@
-import ollama from 'ollama';
+import { InferenceClient } from '@huggingface/inference';
 import { config } from '../config/index.js';
 import { entityExtractionPrompt, emotionAnalysisPrompt, responseGenerationPrompt } from '../prompts/index.js';
+
+const client = new InferenceClient(config.huggingface.token);
+const MODEL = "meta-llama/Meta-Llama-3-8B-Instruct"; // Free and fast model on HF
 
 export const llmOrchestrator = {
   
   async extractEntities(transcript) {
     const prompt = entityExtractionPrompt.replace('{{transcript}}', transcript);
     
-    const response = await ollama.chat({
-      model: 'openbmb/minicpm-o4.5',
+    const response = await client.chatCompletion({
+      model: MODEL,
       messages: [{ role: 'system', content: prompt }],
-      format: 'json',
-      options: { num_gpu: 0 } // Force CPU to avoid CUDA OOM
+      max_tokens: 500,
+      temperature: 0.1
     });
 
-    return JSON.parse(response.message.content);
+    // Extract JSON from response in case of markdown formatting
+    const content = response.choices[0].message.content;
+    const jsonMatch = content.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+    return JSON.parse(jsonMatch ? jsonMatch[0] : content);
   },
 
   async analyzeEmotion(transcript) {
     const prompt = emotionAnalysisPrompt.replace('{{transcript}}', transcript);
     
-    const response = await ollama.chat({
-      model: 'openbmb/minicpm-o4.5',
+    const response = await client.chatCompletion({
+      model: MODEL,
       messages: [{ role: 'system', content: prompt }],
-      format: 'json',
-      options: { num_gpu: 0 } // Force CPU to avoid CUDA OOM
+      max_tokens: 200,
+      temperature: 0.1
     });
 
-    return JSON.parse(response.message.content);
+    const content = response.choices[0].message.content;
+    const jsonMatch = content.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+    return JSON.parse(jsonMatch ? jsonMatch[0] : content);
   },
 
   async generateResponse(transcript, emotionData, taskData) {
@@ -37,13 +45,14 @@ export const llmOrchestrator = {
       .replace('{{emotions}}', emotionData.emotions.join(', '))
       .replace('{{tasks}}', JSON.stringify(taskData.tasks, null, 2));
       
-    const response = await ollama.chat({
-      model: 'openbmb/minicpm-o4.5',
+    const response = await client.chatCompletion({
+      model: MODEL,
       messages: [{ role: 'system', content: prompt }],
-      options: { num_gpu: 0 } // Force CPU to avoid CUDA OOM
+      max_tokens: 300,
+      temperature: 0.7
     });
 
-    return response.message.content;
+    return response.choices[0].message.content;
   },
 
   async processConversation(transcript) {

@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: lifesort-api
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    region: oregon # Or your preferred region
+    plan: free # Free tier is now possible!
+    rootDir: server # Path to the backend
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false # Requires manual input in the Render Dashboard
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: HF_TOKEN
+        sync: false
+      - key: TEE_MASTER_SECRET
+        sync: false
