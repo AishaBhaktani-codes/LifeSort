@@ -9,6 +9,8 @@ import conversationRoutes from './routes/conversationRoutes.js';
 import taskRoutes from './routes/taskRoutes.js';
 import moodRoutes from './routes/moodRoutes.js';
 import reminderRoutes from './routes/reminderRoutes.js';
+import dashboardRoutes from './routes/dashboardRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 const app = express();
 
@@ -36,11 +38,6 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
-
-import reminderRoutes from './routes/reminderRoutes.js';
-import dashboardRoutes from './routes/dashboardRoutes.js';
-
-import userRoutes from './routes/userRoutes.js';
 
 // API Routes
 app.use('/api/auth', authRoutes);

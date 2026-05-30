@@ -57,9 +57,9 @@ export default function DashboardScreen() {
       }
     >
       <View style={styles.heroBanner}>
-        <FadeInView delay={100}>
+        <FadeInView delay={100} style={styles.bannerImage} subtle>
           <Image
-            source={{ uri: images.hero.journal }}
+            source={require('../../assets/dashboard-marble-bg.png')}
             style={styles.bannerImage}
             contentFit="cover"
             transition={300}
@@ -67,7 +67,7 @@ export default function DashboardScreen() {
         </FadeInView>
         <View style={styles.heroOverlay}>
           <FadeInView delay={140}>
-            <PillBadge>Welcome back, {displayName}</PillBadge>
+            <PillBadge>Welcome ! {displayName}</PillBadge>
           </FadeInView>
           <FadeInView delay={180}>
             <Text style={styles.heroTitle}>What’s on your mind today?</Text>
@@ -183,20 +183,25 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
     padding: 20,
-    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    // backgroundColor: 'rgba(241, 128, 226, 0.45)',
   },
   heroTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    fontFamily: 'DancingScript_700Bold',
+    fontSize: 42,
+    color: '#0c0c0c',
     marginTop: 10,
     letterSpacing: -0.3,
   },
   heroSub: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.85)',
+    //fontFamily: 'DancingScript_500Medium',
+    fontSize: 15,
+    fontWeight: '700',
+    color: 'rgba(12, 12, 12, 0.85)',
     marginTop: 6,
     lineHeight: 20,
+  },
+  bannerCursiveText: {
+    fontFamily: 'DancingScript_700Bold',
   },
   section: {
     paddingHorizontal: 20,
