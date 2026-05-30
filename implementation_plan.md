@@ -15,11 +15,10 @@ An empathetic, voice-first AI companion that transforms natural spoken conversat
 
 ## Open Questions
 
-1. **LLM Provider**: Grok vs GPT-4o-mini vs Claude 3.5 Sonnet? (Defaults to GPT-4o-mini)
-2. **"TEEE"**: Interpreted as **TEE (Trusted Execution Environment)** for secure AI processing of sensitive user data. Is this correct, or did you mean something else?
-3. **Offline scope**: Full on-device Whisper (`whisper.rn`) or cloud Whisper + offline caching?
-4. **Target platforms**: iOS + Android, or Android-only for MVP?
-5. **Existing animation templates**: Do you have any, or build from scratch with Reanimated?
+1. **Backend Host**: The backend uses Ollama with `minicpm-o4.5` via Docker. This requires a dedicated server (VPS) with enough RAM (8GB+) or a GPU (e.g., AWS EC2, DigitalOcean Droplet, RunPod, Hetzner, Railway). Do you have a preferred cloud provider?
+2. **Client Target**: Do you want to deploy the client as a Web app (Vercel/Netlify), or package it for Mobile (iOS App Store / Google Play Store via EAS Build)?
+3. **Database**: Are we using the local Supabase/PostgreSQL instance defined in `docker-compose.yml`, or are you using a managed Supabase Cloud instance for production?
+4. **Domain/SSL**: Do you have a custom domain ready for the API and frontend?
 
 ---
 
@@ -439,24 +438,27 @@ Processing pipeline when audio is received:
 
 ---
 
-### Phase 5: Polish & Deployment
+### Phase 5: Production Deployment Strategy
 
-#### Animations
-- Spring card lifts, voice button pulse/glow, staggered dashboard cards
-- Mood chart animated path drawing, haptic feedback
+#### Backend & Local AI (Node.js + Ollama)
+Given the dependency on `openbmb/minicpm-o4.5` via Ollama, the backend requires a host capable of running Docker Compose with substantial memory (8GB+ RAM) or GPU access.
+- **Recommended Hosts:** DigitalOcean Droplet, Hetzner Cloud, AWS EC2, or Railway.
+- **Strategy:** Deploy the existing `docker-compose.yml` to the VPS, and configure a reverse proxy (Nginx or Caddy) to handle SSL/TLS (HTTPS) for the API.
+
+#### Client (Expo App)
+- **Web Build:** Export via `npm run web` and deploy to Vercel or Netlify.
+- **Mobile Build:** Use **EAS (Expo Application Services)** (`eas build`) to create production artifacts (`.apk`/`.aab` for Android, `.ipa` for iOS).
+
+#### Database & Auth
+- Point the backend to a **Production Supabase** instance (Cloud) to manage users, or persist the local PostgreSQL+pgvector database securely on the VPS with regular backups.
 
 #### Privacy & Security (TEE + RLS)
 - Supabase RLS: users access only own data
 - TEE encryption for all transcript/emotion data at rest
 - Audio deleted post-transcription (configurable)
-- API keys in `expo-secure-store`
+- API keys in `expo-secure-store` (for client) and `.env` (for backend)
 - HTTPS only, TLS 1.3
 
-#### Accessibility
-- VoiceOver/TalkBack labels, 44px touch targets, reduced motion support
-
-#### Offline
-- Zustand persist + AsyncStorage, retry queue for failed API calls
 
 ---
 

@@ -7,38 +7,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      # We tell the Node.js app to talk to the 'ollama' service container
-      - OLLAMA_HOST=http://ollama:11434
+      - NODE_ENV=development
     env_file:
       - .env
-    depends_on:
-      - ollama
     restart: unless-stopped
-
-  # The local Ollama server running the LLM
-  ollama:
-    image: ollama/ollama:latest
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-    restart: unless-stopped
-
-  # Helper service to automatically download the minicpm-o4.5 model on startup
-  init-ollama:
-    image: curlimages/curl:latest
-    depends_on:
-      - ollama
-    command: >
-      sh -c "
-        echo 'Waiting for Ollama to be ready...'
-        while ! curl -s http://ollama:11434/api/tags > /dev/null; do
-          sleep 2
-        done
-        echo 'Ollama is ready. Automatically pulling the openbmb/minicpm-o4.5 model (This might take a while on the first run)...'
-        curl -s -X POST http://ollama:11434/api/pull -d '{\"name\": \"openbmb/minicpm-o4.5\"}'
-        echo 'Model is ready!'
-      "
-
-volumes:
-  ollama_data:
