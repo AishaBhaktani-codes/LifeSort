@@ -1,8 +1,8 @@
-import { InferenceClient } from '@huggingface/inference';
+import { HfInference } from '@huggingface/inference';
 import { config } from '../config/index.js';
 import { entityExtractionPrompt, emotionAnalysisPrompt, responseGenerationPrompt } from '../prompts/index.js';
 
-const client = new InferenceClient(config.huggingface.token);
+const client = new HfInference(config.huggingface.token);
 const MODEL = "meta-llama/Meta-Llama-3-8B-Instruct"; // Free and fast model on HF
 
 export const llmOrchestrator = {
