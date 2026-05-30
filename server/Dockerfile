@@ -2,14 +2,21 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Copy package dependencies and prisma schema first for caching
 COPY package*.json ./
+COPY prisma ./prisma/
+
+# Install dependencies
 RUN npm install
 
-COPY prisma ./prisma
+# Generate Prisma Client (needed before starting the app)
 RUN npx prisma generate
 
-COPY src ./src
+# Copy the rest of the application
+COPY . .
 
+# Expose the API port
 EXPOSE 3000
 
-CMD ["node", "src/server.js"]
+# Start the server
+CMD ["npm", "start"]

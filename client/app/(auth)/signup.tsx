@@ -22,7 +22,7 @@ import { colors } from '../../src/constants/colors';
 import { typography } from '../../src/constants/typography';
 
 export default function SignupScreen() {
-  const { signUpWithEmail, loading } = useAuth();
+  const { signUpWithEmail, loginWithGoogle, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -71,6 +71,20 @@ export default function SignupScreen() {
             onPress={handleSignUp}
             disabled={loading}
           />
+          
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>or</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          <PrimaryButton
+            label="Continue with Google"
+            variant="primary"
+            onPress={loginWithGoogle}
+            disabled={loading}
+            style={styles.googleBtn}
+          />
         </FadeInView>
 
         <Link href="/(auth)/login" asChild>
@@ -118,5 +132,23 @@ const styles = StyleSheet.create({
   linkBold: {
     color: colors.light.primary,
     fontWeight: '700',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.light.borderLight,
+  },
+  dividerText: {
+    paddingHorizontal: 10,
+    color: colors.light.textMuted,
+    fontSize: 14,
+  },
+  googleBtn: {
+    marginBottom: 8,
   },
 });

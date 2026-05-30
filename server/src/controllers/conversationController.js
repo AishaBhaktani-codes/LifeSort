@@ -68,14 +68,37 @@ export const uploadConversation = async (req, res, next) => {
       include: { tasks: true, moodEntries: true }
     });
 
-    res.status(201).json({ 
-      status: 'success', 
-      data: {
-        conversation: { id: conversation.id, categories: conversation.categories },
-        assistantResponse: aiResult.assistantResponse,
-        tasksCreated: conversation.tasks.length,
-        moodRecorded: aiResult.emotions
-      } 
+    res.status(201).json({
+      conversation: {
+        id: conversation.id,
+        userId: conversation.userId,
+        title: aiResult.entities.title || `${req.body.flowType} Session`,
+        encryptedTranscript: '',
+        summary: aiResult.assistantResponse.slice(0, 120),
+        flowType: conversation.flowType,
+        durationSeconds: parseInt(req.body.durationSeconds) || 0,
+        overallSentiment: conversation.overallSentiment,
+        categories: conversation.categories,
+        createdAt: conversation.createdAt.toISOString(),
+      },
+      transcript: transcript,
+      aiResponse: aiResult.assistantResponse,
+      tasks: conversation.tasks.map(t => ({
+        id: t.id, userId: t.userId, title: t.title,
+        description: t.description, category: t.category,
+        priority: t.priority, status: t.status,
+        dueDate: t.dueDate?.toISOString(), people: t.people || [],
+        createdAt: t.createdAt.toISOString(),
+      })),
+      mood: conversation.moodEntries[0] ? {
+        id: conversation.moodEntries[0].id,
+        userId: conversation.moodEntries[0].userId,
+        score: conversation.moodEntries[0].score,
+        emotions: conversation.moodEntries[0].emotions,
+        triggers: conversation.moodEntries[0].triggers,
+        notes: conversation.moodEntries[0].notes,
+        createdAt: conversation.moodEntries[0].createdAt.toISOString(),
+      } : null,
     });
   } catch (error) {
     next(error);
@@ -88,7 +111,13 @@ export const getConversations = async (req, res, next) => {
       where: { userId: req.user.id },
       orderBy: { createdAt: 'desc' }
     });
-    res.status(200).json({ status: 'success', data: conversations });
+    res.status(200).json(conversations.map(c => ({
+      id: c.id, userId: c.userId, title: c.title,
+      encryptedTranscript: '', summary: c.summary,
+      flowType: c.flowType, durationSeconds: c.durationSeconds,
+      overallSentiment: c.overallSentiment, categories: c.categories,
+      createdAt: c.createdAt.toISOString(),
+    })));
   } catch (error) {
     next(error);
   }
@@ -104,6 +133,24 @@ export const getConversationById = async (req, res, next) => {
     if (!conversation) return res.status(404).json({ error: 'Conversation not found' });
 
     res.status(200).json({ status: 'success', data: conversation });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteConversation = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const conversation = await prisma.conversation.findUnique({ where: { id } });
+    if (!conversation || conversation.userId !== req.user.id) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+    // Delete related records first (cascading)
+    await prisma.moodEntry.deleteMany({ where: { conversationId: id } });
+    await prisma.reminder.deleteMany({ where: { task: { conversationId: id } } });
+    await prisma.task.deleteMany({ where: { conversationId: id } });
+    await prisma.conversation.delete({ where: { id } });
+    res.status(200).json({ status: 'deleted' });
   } catch (error) {
     next(error);
   }

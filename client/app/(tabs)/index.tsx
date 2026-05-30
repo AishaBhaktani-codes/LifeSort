@@ -16,12 +16,27 @@ import { QuickActionCard, StatPill } from '../../src/components/dashboard';
 import { colors } from '../../src/constants/colors';
 import { images } from '../../src/constants/images';
 import { useAuthStore } from '../../src/store/authStore';
+import { useDashboard } from '../../src/hooks/useDashboard';
+import { useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 
 export default function DashboardScreen() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
-  const displayName =
-    user?.email?.split('@')[0] ?? 'there';
+  const { stats, fetchDashboardStats } = useDashboard();
+  
+  useFocusEffect(
+    useCallback(() => {
+      fetchDashboardStats();
+    }, [fetchDashboardStats])
+  );
+
+  const displayName = user?.email?.split('@')[0] ?? 'there';
+
+  const formatMoodScore = (score: number) => {
+    if (!score) return '—';
+    return score.toFixed(1);
+  };
 
   return (
     <ScreenShell
@@ -73,9 +88,9 @@ export default function DashboardScreen() {
       </View>
 
       <View style={styles.statsRow}>
-        <StatPill label="Sessions" value="—" delay={260} />
-        <StatPill label="Mood avg" value="—" highlight="this week" delay={300} />
-        <StatPill label="Tasks" value="—" delay={340} />
+        <StatPill label="Sessions" value={stats.sessionCount.toString()} delay={260} />
+        <StatPill label="Mood avg" value={formatMoodScore(stats.avgMoodScore)} highlight="this week" delay={300} />
+        <StatPill label="Tasks" value={stats.pendingTaskCount.toString()} delay={340} />
       </View>
 
       <View style={styles.section}>

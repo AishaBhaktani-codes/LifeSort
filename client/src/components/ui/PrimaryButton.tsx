@@ -38,7 +38,7 @@ export function PrimaryButton({
       onPress={onPress}
       disabled={disabled}
       onPressIn={() => {
-        scale.value = withSpring(0.97, animations.springConfig.bouncy);
+        scale.value = withSpring(0.95, animations.springConfig.bouncy);
       }}
       onPressOut={() => {
         scale.value = withSpring(1, animations.springConfig.smooth);
@@ -60,16 +60,17 @@ export function PrimaryButton({
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: 16,
-    paddingHorizontal: 28,
-    borderRadius: 999,
+    paddingVertical: 18,
+    paddingHorizontal: 32,
+    borderRadius: 9999, // Pill shape
     alignItems: 'center',
     justifyContent: 'center',
+    // Removed massive shadow for a flatter, modern Acctual look
     shadowColor: colors.light.shadow,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
-    shadowRadius: 12,
-    elevation: 4,
+    shadowRadius: 4,
+    elevation: 2,
   },
   buttonDark: {
     backgroundColor: colors.light.cta,
@@ -79,7 +80,8 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.2,
   },
   labelDark: {
     color: colors.light.ctaText,

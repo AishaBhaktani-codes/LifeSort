@@ -82,7 +82,7 @@ export default function ConversationScreen() {
   }
 
   return (
-    <ScreenShell scroll={false} contentStyle={styles.shellContent}>
+    <ScreenShell scroll={true} contentStyle={styles.shellContent}>
       <FloatingHeader
         title="LifeSort"
         subtitle="Conversational companion"
@@ -195,8 +195,8 @@ export default function ConversationScreen() {
 
 const styles = StyleSheet.create({
   shellContent: {
-    flex: 1,
-    paddingBottom: 100,
+    flexGrow: 1,
+    paddingBottom: 40,
   },
   teeBadge: {
     flexDirection: 'row',
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   mainContent: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'space-between',
     paddingVertical: 20,
   },
@@ -233,10 +233,12 @@ const styles = StyleSheet.create({
   },
   flowSelector: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 10,
   },
   flowCard: {
     flex: 1,
+    minWidth: 120,
     backgroundColor: colors.light.surface,
     borderRadius: 20,
     padding: 12,
@@ -278,10 +280,12 @@ const styles = StyleSheet.create({
     lineHeight: 15,
   },
   visualizerContainer: {
-    flex: 1,
+    flexGrow: 1,
+    minHeight: 180,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 30,
+    paddingVertical: 20,
   },
   recordingStatusContainer: {
     alignItems: 'center',

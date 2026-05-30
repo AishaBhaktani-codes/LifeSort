@@ -28,3 +28,20 @@ api.interceptors.request.use(async (config) => {
   }
   return config;
 });
+
+import { supabase } from './supabase';
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      const { data: { session } } = await supabase.auth.refreshSession();
+      if (session) {
+        useAuthStore.getState().setSession(session);
+        error.config.headers.Authorization = `Bearer ${session.access_token}`;
+        return api.request(error.config);
+      }
+    }
+    return Promise.reject(error);
+  }
+);

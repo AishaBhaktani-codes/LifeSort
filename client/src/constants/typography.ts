@@ -8,8 +8,8 @@ export const typography = {
     xxl: 24,
     xxxl: 32,
     /** Acctual-style display headlines */
-    display: 36,
-    displaySm: 28,
+    display: 48,
+    displaySm: 36,
   },
   letterSpacing: {
     tight: -0.5,
@@ -22,11 +22,14 @@ export const typography = {
     lg: 28,
     xl: 32,
     xxl: 36,
+    display: 56,
   },
   fontWeights: {
-    regular: '400',
-    medium: '500',
-    semibold: '600',
-    bold: '700',
+    regular: '400' as const,
+    medium: '500' as const,
+    semibold: '600' as const,
+    bold: '700' as const,
+    extrabold: '800' as const,
+    black: '900' as const,
   }
 };

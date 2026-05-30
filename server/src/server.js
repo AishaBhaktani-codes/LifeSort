@@ -37,12 +37,19 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+import reminderRoutes from './routes/reminderRoutes.js';
+import dashboardRoutes from './routes/dashboardRoutes.js';
+
+import userRoutes from './routes/userRoutes.js';
+
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/moods', moodRoutes);
 app.use('/api/reminders', reminderRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Error Handling Middleware (should be last)
 app.use(errorHandler);

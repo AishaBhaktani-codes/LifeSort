@@ -1,27 +1,33 @@
 import React, { ReactNode } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { colors } from '../../constants/colors';
+
+export type BadgeVariant = 'blue' | 'pink' | 'yellow' | 'green' | 'purple' | 'neutral';
 
 interface PillBadgeProps {
   children: ReactNode;
-  variant?: 'primary' | 'neutral';
+  variant?: BadgeVariant;
+  style?: ViewStyle;
 }
 
-export function PillBadge({ children, variant = 'primary' }: PillBadgeProps) {
-  const isPrimary = variant === 'primary';
+export function PillBadge({ children, variant = 'blue', style }: PillBadgeProps) {
+  
+  const getColors = () => {
+    if (variant === 'neutral') {
+      return { bg: colors.light.surfaceElevated, text: colors.light.textSecondary };
+    }
+    const pastels = colors.light.pastels as any;
+    return {
+      bg: pastels[variant] || pastels.blue,
+      text: pastels[`${variant}Text`] || pastels.blueText,
+    };
+  };
+
+  const { bg, text } = getColors();
+
   return (
-    <View
-      style={[
-        styles.badge,
-        isPrimary ? styles.badgePrimary : styles.badgeNeutral,
-      ]}
-    >
-      <Text
-        style={[
-          styles.text,
-          isPrimary ? styles.textPrimary : styles.textNeutral,
-        ]}
-      >
+    <View style={[styles.badge, { backgroundColor: bg }, style]}>
+      <Text style={[styles.text, { color: text }]}>
         {children}
       </Text>
     </View>
@@ -32,23 +38,13 @@ const styles = StyleSheet.create({
   badge: {
     alignSelf: 'flex-start',
     paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: 999,
-  },
-  badgePrimary: {
-    backgroundColor: colors.light.badge,
-  },
-  badgeNeutral: {
-    backgroundColor: colors.light.surfaceElevated,
+    paddingHorizontal: 16,
+    borderRadius: 9999,
   },
   text: {
     fontSize: 12,
-    fontWeight: '600',
-  },
-  textPrimary: {
-    color: colors.light.badgeText,
-  },
-  textNeutral: {
-    color: colors.light.textSecondary,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
 });
