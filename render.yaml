@@ -2,12 +2,12 @@ services:
   - type: web
     name: lifesort-api
     env: node
-    buildCommand: npm install
+    buildCommand: npm ci
     startCommand: npm start
     region: oregon # Or your preferred region
     plan: free # Free tier is now possible!
     rootDir: server # Path to the backend
-    healthCheckPath: /
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
