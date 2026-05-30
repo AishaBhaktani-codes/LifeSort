@@ -13,7 +13,7 @@ export const getTasks = async (req, res, next) => {
       orderBy: { createdAt: 'desc' }
     });
     
-    res.status(200).json({ status: 'success', data: tasks });
+    res.status(200).json(tasks);
   } catch (error) {
     next(error);
   }
@@ -35,7 +35,7 @@ export const updateTask = async (req, res, next) => {
       data: { status, title, dueDate }
     });
 
-    res.status(200).json({ status: 'success', data: updatedTask });
+    res.status(200).json(updatedTask);
   } catch (error) {
     next(error);
   }

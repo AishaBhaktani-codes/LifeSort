@@ -1,21 +1,41 @@
 import React from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { Image } from 'expo-image';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated, { FadeIn, SharedValue, useAnimatedStyle, interpolate, Extrapolation } from 'react-native-reanimated';
 import { images } from '../../constants/images';
 
 const { width: SCREEN_W } = Dimensions.get('window');
 
 interface HeroDecorProps {
   variant?: 'login' | 'dashboard';
+  scrollOffset?: SharedValue<number>;
 }
 
-export function HeroDecor({ variant = 'login' }: HeroDecorProps) {
+export function HeroDecor({ variant = 'login', scrollOffset }: HeroDecorProps) {
+  
+  const plantStyle = useAnimatedStyle(() => {
+    if (!scrollOffset) return {};
+    const translateY = interpolate(scrollOffset.value, [0, 500], [0, -100], Extrapolation.CLAMP);
+    return { transform: [{ translateY }, { rotate: '-12deg' }] };
+  });
+
+  const headphonesStyle = useAnimatedStyle(() => {
+    if (!scrollOffset) return {};
+    const translateY = interpolate(scrollOffset.value, [0, 500], [0, -40], Extrapolation.CLAMP);
+    return { transform: [{ translateY }, { rotate: '8deg' }] };
+  });
+
+  const workspaceStyle = useAnimatedStyle(() => {
+    if (!scrollOffset) return {};
+    const translateY = interpolate(scrollOffset.value, [0, 500], [0, -70], Extrapolation.CLAMP);
+    return { transform: [{ translateY }, { rotate: '4deg' }] };
+  });
+
   return (
     <View style={styles.container} pointerEvents="none">
       <Animated.View
         entering={FadeIn.delay(400).duration(800)}
-        style={[styles.decor, styles.plant]}
+        style={[styles.decor, styles.plant, plantStyle]}
       >
         <Image
           source={{ uri: images.decor.plant }}
@@ -25,7 +45,7 @@ export function HeroDecor({ variant = 'login' }: HeroDecorProps) {
       </Animated.View>
       <Animated.View
         entering={FadeIn.delay(550).duration(800)}
-        style={[styles.decor, styles.headphones]}
+        style={[styles.decor, styles.headphones, headphonesStyle]}
       >
         <Image
           source={{ uri: images.decor.headphones }}
@@ -36,7 +56,7 @@ export function HeroDecor({ variant = 'login' }: HeroDecorProps) {
       {variant === 'dashboard' && (
         <Animated.View
           entering={FadeIn.delay(650).duration(800)}
-          style={[styles.decor, styles.workspace]}
+          style={[styles.decor, styles.workspace, workspaceStyle]}
         >
           <Image
             source={{ uri: images.decor.workspace }}

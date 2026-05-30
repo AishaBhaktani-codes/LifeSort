@@ -8,7 +8,7 @@ export const getMoodHistory = async (req, res, next) => {
       take: 50 // Limit to recent 50 for MVP
     });
     
-    res.status(200).json({ status: 'success', data: moods });
+    res.status(200).json(moods);
   } catch (error) {
     next(error);
   }
@@ -30,11 +30,8 @@ export const getMoodTrends = async (req, res, next) => {
       : 0;
 
     res.status(200).json({ 
-      status: 'success', 
-      data: {
-        averageScore: avgScore,
-        recentEntries: moods
-      } 
+      averageScore: avgScore,
+      recentEntries: moods
     });
   } catch (error) {
     next(error);

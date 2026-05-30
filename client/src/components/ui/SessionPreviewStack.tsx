@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
-import Animated, { FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeInUp, SharedValue, useAnimatedStyle, interpolate, Extrapolation } from 'react-native-reanimated';
 import { colors } from '../../constants/colors';
 import { images } from '../../constants/images';
 
@@ -12,9 +12,10 @@ const PREVIEWS = [
     summary: '3 tasks extracted',
     from: 'You',
     to: 'LifeSort',
-    accent: colors.light.primary,
+    accent: '#0369A1',
+    bgAccent: '#E0F2FE',
     image: images.cards.tasks,
-    offset: { top: 0, left: 0, rotate: '-2deg' },
+    baseOffset: { top: 0, left: 0, rotate: '-2deg' },
     zIndex: 3,
   },
   {
@@ -23,9 +24,10 @@ const PREVIEWS = [
     summary: 'Feeling good · 78%',
     from: 'Morning',
     to: 'Insights',
-    accent: colors.light.accent,
+    accent: '#B45309',
+    bgAccent: '#FEF3C7',
     image: images.cards.mood,
-    offset: { top: 24, left: 28, rotate: '1.5deg' },
+    baseOffset: { top: 24, left: 28, rotate: '1.5deg' },
     zIndex: 2,
   },
   {
@@ -34,56 +36,78 @@ const PREVIEWS = [
     summary: 'Empathetic reply ready',
     from: 'Session',
     to: 'Companion',
-    accent: '#F59E0B',
+    accent: '#BE185D',
+    bgAccent: '#FCE7F3',
     image: images.cards.voice,
-    offset: { top: 48, left: 56, rotate: '3deg' },
+    baseOffset: { top: 48, left: 56, rotate: '3deg' },
     zIndex: 1,
   },
 ] as const;
 
-export function SessionPreviewStack() {
+export function SessionPreviewStack({ scrollOffset }: { scrollOffset?: SharedValue<number> }) {
   return (
     <View style={styles.container}>
-      {PREVIEWS.map((card, index) => (
-        <Animated.View
-          key={card.id}
-          entering={FadeInUp.delay(200 + index * 100)
-            .duration(550)
-            .springify()}
-          style={[
-            styles.card,
-            {
-              top: card.offset.top,
-              left: card.offset.left,
-              zIndex: card.zIndex,
-              transform: [{ rotate: card.offset.rotate }],
-            },
-          ]}
-        >
-          <View style={styles.cardHeader}>
-            <Image source={{ uri: card.image }} style={styles.thumb} />
-            <View style={styles.cardMeta}>
-              <Text style={styles.mode}>{card.mode}</Text>
-              <Text style={styles.summary}>{card.summary}</Text>
+      {PREVIEWS.map((card, index) => {
+        const animatedStyle = useAnimatedStyle(() => {
+          if (!scrollOffset) return {};
+          
+          const translateY = interpolate(
+            scrollOffset.value,
+            [0, 400],
+            [0, -40 * (3 - index)],
+            Extrapolation.CLAMP
+          );
+          
+          return {
+            transform: [
+              { translateY },
+              { rotate: card.baseOffset.rotate }
+            ]
+          };
+        });
+
+        return (
+          <Animated.View
+            key={card.id}
+            entering={FadeInUp.delay(200 + index * 100)
+              .duration(550)
+              .springify()}
+            style={[
+              styles.card,
+              {
+                top: card.baseOffset.top,
+                left: card.baseOffset.left,
+                zIndex: card.zIndex,
+                transform: scrollOffset ? undefined : [{ rotate: card.baseOffset.rotate }],
+              },
+              scrollOffset && animatedStyle,
+            ]}
+          >
+            <View style={styles.cardHeader}>
+              <Image source={{ uri: card.image }} style={styles.thumb} />
+              <View style={styles.cardMeta}>
+                <Text style={styles.mode}>{card.mode}</Text>
+                <Text style={styles.summary}>{card.summary}</Text>
+              </View>
             </View>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.row}>
-            <Text style={styles.label}>From</Text>
-            <Text style={styles.value}>{card.from}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>To</Text>
-            <Text style={styles.value}>{card.to}</Text>
-          </View>
-          <View style={[styles.ctaStrip, { backgroundColor: card.accent + '18' }]}>
-            <View style={[styles.ctaDot, { backgroundColor: card.accent }]} />
-            <Text style={[styles.ctaText, { color: card.accent }]}>
-              Open in LifeSort
-            </Text>
-          </View>
-        </Animated.View>
-      ))}
+            <View style={styles.divider} />
+            <View style={styles.row}>
+              <Text style={styles.label}>From</Text>
+              <Text style={styles.value}>{card.from}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>To</Text>
+              <Text style={styles.value}>{card.to}</Text>
+            </View>
+            <View style={[styles.ctaStrip, { backgroundColor: card.bgAccent }]}>
+              <View style={[styles.ctaDot, { backgroundColor: card.accent }]} />
+              <Text style={[styles.ctaText, { color: card.accent }]}>
+                Open in LifeSort
+              </Text>
+            </View>
+          </Animated.View>
+        );
+      })}
     </View>
   );
 }
@@ -91,22 +115,22 @@ export function SessionPreviewStack() {
 const styles = StyleSheet.create({
   container: {
     height: 220,
-    marginTop: 8,
+    marginTop: 16,
     marginBottom: 8,
     position: 'relative',
   },
   card: {
     position: 'absolute',
-    width: 260,
+    width: 280,
     backgroundColor: colors.light.surface,
-    borderRadius: 20,
+    borderRadius: 24,
     padding: 16,
     borderWidth: 1,
-    borderColor: colors.light.border,
-    shadowColor: colors.light.shadow,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 1,
-    shadowRadius: 20,
+    borderColor: colors.light.borderLight,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.05,
+    shadowRadius: 24,
     elevation: 6,
   },
   cardHeader: {
@@ -131,9 +155,10 @@ const styles = StyleSheet.create({
   },
   summary: {
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '800',
     color: colors.light.text,
     marginTop: 2,
+    letterSpacing: -0.2,
   },
   divider: {
     height: 1,
@@ -161,7 +186,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingVertical: 10,
     paddingHorizontal: 12,
-    borderRadius: 12,
+    borderRadius: 9999,
   },
   ctaDot: {
     width: 8,
@@ -170,6 +195,6 @@ const styles = StyleSheet.create({
   },
   ctaText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });

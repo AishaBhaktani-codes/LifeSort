@@ -1,35 +1,33 @@
-import OpenAI from 'openai';
+import ollama from 'ollama';
 import { config } from '../config/index.js';
 import { entityExtractionPrompt, emotionAnalysisPrompt, responseGenerationPrompt } from '../prompts/index.js';
-
-const openai = new OpenAI({
-  apiKey: config.openai.apiKey,
-});
 
 export const llmOrchestrator = {
   
   async extractEntities(transcript) {
     const prompt = entityExtractionPrompt.replace('{{transcript}}', transcript);
     
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+    const response = await ollama.chat({
+      model: 'openbmb/minicpm-o4.5',
       messages: [{ role: 'system', content: prompt }],
-      response_format: { type: 'json_object' }
+      format: 'json',
+      options: { num_gpu: 0 } // Force CPU to avoid CUDA OOM
     });
 
-    return JSON.parse(response.choices[0].message.content);
+    return JSON.parse(response.message.content);
   },
 
   async analyzeEmotion(transcript) {
     const prompt = emotionAnalysisPrompt.replace('{{transcript}}', transcript);
     
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+    const response = await ollama.chat({
+      model: 'openbmb/minicpm-o4.5',
       messages: [{ role: 'system', content: prompt }],
-      response_format: { type: 'json_object' }
+      format: 'json',
+      options: { num_gpu: 0 } // Force CPU to avoid CUDA OOM
     });
 
-    return JSON.parse(response.choices[0].message.content);
+    return JSON.parse(response.message.content);
   },
 
   async generateResponse(transcript, emotionData, taskData) {
@@ -39,12 +37,13 @@ export const llmOrchestrator = {
       .replace('{{emotions}}', emotionData.emotions.join(', '))
       .replace('{{tasks}}', JSON.stringify(taskData.tasks, null, 2));
       
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'system', content: prompt }]
+    const response = await ollama.chat({
+      model: 'openbmb/minicpm-o4.5',
+      messages: [{ role: 'system', content: prompt }],
+      options: { num_gpu: 0 } // Force CPU to avoid CUDA OOM
     });
 
-    return response.choices[0].message.content;
+    return response.message.content;
   },
 
   async processConversation(transcript) {

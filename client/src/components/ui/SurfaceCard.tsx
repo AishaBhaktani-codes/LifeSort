@@ -45,21 +45,22 @@ export function SurfaceCard({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.light.surface,
-    borderRadius: 20,
-    padding: 16,
+    borderRadius: 24, // Acctual uses large border radii
+    padding: 24,
     borderWidth: 1,
-    borderColor: colors.light.border,
-    shadowColor: colors.light.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 12,
-    elevation: 2,
+    borderColor: colors.light.borderLight, // Very subtle border
+    shadowColor: '#0F172A', // Using the dark charcoal for shadow
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.04, // Extremely soft
+    shadowRadius: 32, // Large spread
+    elevation: 4,
   },
   cardActive: {
-    borderColor: colors.light.primary,
-    backgroundColor: colors.light.primaryMuted,
+    borderColor: colors.light.primaryLight,
+    backgroundColor: '#FAFBFC',
   },
   pressed: {
-    opacity: 0.92,
+    opacity: 0.95,
+    transform: [{ scale: 0.99 }], // subtle press interaction
   },
 });

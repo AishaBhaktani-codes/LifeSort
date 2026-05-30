@@ -1,22 +1,44 @@
 version: '3.8'
 
 services:
-  db:
-    image: pgvector/pgvector:pg16
-    container_name: lifesort-db
+  # The Node.js Backend Server
+  server:
+    build: .
     ports:
-      - "5432:5432"
+      - "3000:3000"
     environment:
-      POSTGRES_DB: lifesort
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgrespassword
+      # We tell the Node.js app to talk to the 'ollama' service container
+      - OLLAMA_HOST=http://ollama:11434
+    env_file:
+      - .env
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+  # The local Ollama server running the LLM
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d lifesort"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+  # Helper service to automatically download the minicpm-o4.5 model on startup
+  init-ollama:
+    image: curlimages/curl:latest
+    depends_on:
+      - ollama
+    command: >
+      sh -c "
+        echo 'Waiting for Ollama to be ready...'
+        while ! curl -s http://ollama:11434/api/tags > /dev/null; do
+          sleep 2
+        done
+        echo 'Ollama is ready. Automatically pulling the openbmb/minicpm-o4.5 model (This might take a while on the first run)...'
+        curl -s -X POST http://ollama:11434/api/pull -d '{\"name\": \"openbmb/minicpm-o4.5\"}'
+        echo 'Model is ready!'
+      "
 
 volumes:
-  postgres_data:
+  ollama_data:

@@ -10,6 +10,7 @@ interface SectionHeadingProps {
   subtitle?: string;
   delay?: number;
   size?: 'lg' | 'md';
+  centered?: boolean;
 }
 
 export function SectionHeading({
@@ -18,19 +19,21 @@ export function SectionHeading({
   subtitle,
   delay = 0,
   size = 'lg',
+  centered = false,
 }: SectionHeadingProps) {
   return (
-    <FadeInView delay={delay} style={styles.wrap}>
-      {eyebrow != null && <Text style={styles.eyebrow}>{eyebrow}</Text>}
+    <FadeInView delay={delay} style={[styles.wrap, centered && styles.wrapCentered]}>
+      {eyebrow != null && <Text style={[styles.eyebrow, centered && styles.textCentered]}>{eyebrow}</Text>}
       <Text
         style={[
           styles.title,
           size === 'md' && styles.titleMd,
+          centered && styles.textCentered,
         ]}
       >
         {title}
       </Text>
-      {subtitle != null && <Text style={styles.subtitle}>{subtitle}</Text>}
+      {subtitle != null && <Text style={[styles.subtitle, centered && styles.textCentered]}>{subtitle}</Text>}
     </FadeInView>
   );
 }
@@ -38,6 +41,12 @@ export function SectionHeading({
 const styles = StyleSheet.create({
   wrap: {
     marginBottom: 20,
+  },
+  wrapCentered: {
+    alignItems: 'center',
+  },
+  textCentered: {
+    textAlign: 'center',
   },
   eyebrow: {
     fontSize: typography.fontSizes.xs,
@@ -49,10 +58,10 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: typography.fontSizes.displaySm,
-    fontWeight: '700',
+    fontWeight: '900', // Making heading bolder for Acctual style
     color: colors.light.text,
     letterSpacing: typography.letterSpacing.tight,
-    lineHeight: 34,
+    lineHeight: 40, // Increased line height for bigger font
   },
   titleMd: {
     fontSize: typography.fontSizes.xxl,
@@ -62,6 +71,6 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSizes.md,
     color: colors.light.textSecondary,
     lineHeight: 24,
-    marginTop: 10,
+    marginTop: 12,
   },
 });

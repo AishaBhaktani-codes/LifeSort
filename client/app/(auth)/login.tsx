@@ -11,6 +11,7 @@ import {
 import { Image } from 'expo-image';
 import { Link, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import {
   ScreenShell,
   PillBadge,
@@ -28,9 +29,16 @@ import { typography } from '../../src/constants/typography';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { loginWithEmail, loading } = useAuth();
+  const { loginWithEmail, loginWithGoogle, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const scrollOffset = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollOffset.value = event.contentOffset.y;
+    },
+  });
 
   const handleLogin = async () => {
     if (!email.trim() || !password) return;
@@ -38,10 +46,19 @@ export default function LoginScreen() {
   };
 
   return (
-    <ScreenShell scroll scrollProps={{ keyboardShouldPersistTaps: 'handled' }}>
-      <HeroDecor variant="login" />
+    <ScreenShell 
+      scroll 
+      contentStyle={styles.webContainer}
+      scrollProps={{ 
+        keyboardShouldPersistTaps: 'handled',
+        onScroll: scrollHandler,
+        scrollEventThrottle: 16
+      }}
+    >
+      <HeroDecor variant="login" scrollOffset={scrollOffset} />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={styles.keyboardView}
       >
         <View style={styles.heroImageWrap}>
           <FadeInView delay={100}>
@@ -59,17 +76,18 @@ export default function LoginScreen() {
         </View>
 
         <View style={styles.body}>
-          <FadeInView delay={120}>
-            <PillBadge>Trusted voice-first life companion</PillBadge>
+          <FadeInView delay={120} style={styles.badgeWrap}>
+            <PillBadge variant="blue">Trusted voice-first life companion</PillBadge>
           </FadeInView>
 
           <SectionHeading
             delay={160}
+            centered
             title="Sort your life, on time"
             subtitle="Speak naturally. LifeSort turns your thoughts into tasks, mood insights, and gentle reminders — with no clutter."
           />
 
-          <FadeInView delay={240}>
+          <FadeInView delay={240} style={styles.buttonWrap}>
             <PrimaryButton
               label="Start speaking"
               onPress={() => router.push('/(auth)/signup')}
@@ -90,8 +108,8 @@ export default function LoginScreen() {
             />
           </FadeInView>
 
-          <FadeInView delay={380}>
-            <SessionPreviewStack />
+          <FadeInView delay={380} style={styles.stackWrap}>
+            <SessionPreviewStack scrollOffset={scrollOffset} />
           </FadeInView>
 
           <FadeInView delay={440} style={styles.form}>
@@ -115,11 +133,26 @@ export default function LoginScreen() {
             />
             <PrimaryButton
               label={loading ? 'Signing in…' : 'Sign in'}
-              variant="primary"
+              variant="dark"
               onPress={handleLogin}
               disabled={loading}
               style={styles.signInBtn}
             />
+
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>or</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <PrimaryButton
+              label="Continue with Google"
+              variant="primary"
+              onPress={loginWithGoogle}
+              disabled={loading}
+              style={styles.googleBtn}
+            />
+
             <Link href="/(auth)/signup" asChild>
               <Pressable style={styles.linkWrap}>
                 <Text style={styles.link}>
@@ -135,12 +168,20 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
+  webContainer: {
+    maxWidth: 720,
+    width: '100%',
+    alignSelf: 'center',
+  },
+  keyboardView: {
+    flex: 1,
+  },
   heroImageWrap: {
-    marginHorizontal: 20,
-    marginTop: 8,
-    borderRadius: 24,
+    marginHorizontal: 16,
+    marginTop: 16,
+    borderRadius: 32, // Acctual style larger radius
     overflow: 'hidden',
-    height: 180,
+    height: 260, // Taller image for better parallax effect
   },
   heroImage: {
     width: '100%',
@@ -150,44 +191,82 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
   },
   body: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
+    paddingHorizontal: 24,
+    paddingTop: 16,
+  },
+  badgeWrap: {
+    alignItems: 'center', // Center badge for Acctual style
+    marginBottom: 24,
+  },
+  buttonWrap: {
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  stackWrap: {
+    alignItems: 'center',
   },
   features: {
-    marginTop: 20,
-    marginBottom: 8,
+    marginTop: 48,
+    marginBottom: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 20,
+    // Add Acctual card shadow to features
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.04,
+    shadowRadius: 32,
+    elevation: 4,
   },
   form: {
-    marginTop: 24,
-    paddingTop: 24,
+    marginTop: 48,
+    paddingTop: 32,
     borderTopWidth: 1,
     borderTopColor: colors.light.borderLight,
   },
   formLabel: {
     fontSize: typography.fontSizes.sm,
-    fontWeight: '700',
+    fontWeight: '800',
     color: colors.light.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   input: {
-    backgroundColor: colors.light.surface,
+    backgroundColor: '#FAFBFC',
     borderWidth: 1,
-    borderColor: colors.light.border,
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    borderColor: colors.light.borderLight,
+    borderRadius: 9999, // Pill shaped inputs!
+    paddingHorizontal: 24,
+    paddingVertical: 18,
     fontSize: 16,
     color: colors.light.text,
     marginBottom: 12,
   },
   signInBtn: {
-    marginTop: 4,
+    marginTop: 8,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.light.borderLight,
+  },
+  dividerText: {
+    paddingHorizontal: 10,
+    color: colors.light.textMuted,
+    fontSize: 14,
+  },
+  googleBtn: {
+    marginBottom: 8,
   },
   linkWrap: {
     alignItems: 'center',
-    marginTop: 16,
+    marginTop: 20,
     paddingVertical: 8,
   },
   link: {
@@ -195,7 +274,7 @@ const styles = StyleSheet.create({
     color: colors.light.textSecondary,
   },
   linkBold: {
-    color: colors.light.primary,
-    fontWeight: '700',
+    color: colors.light.cta,
+    fontWeight: '800',
   },
 });

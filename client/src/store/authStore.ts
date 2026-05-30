@@ -6,6 +6,7 @@ interface AuthState {
   session: Session | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  token: string | null;
   setUser: (user: User | null) => void;
   setSession: (session: Session | null) => void;
   setIsLoading: (isLoading: boolean) => void;
@@ -17,8 +18,14 @@ export const useAuthStore = create<AuthState>((set) => ({
   session: null,
   isAuthenticated: false,
   isLoading: true, // Start as true while we check async storage
+  token: null,
   setUser: (user) => set((state) => ({ user, isAuthenticated: !!user || !!state.session })),
-  setSession: (session) => set((state) => ({ session, isAuthenticated: !!session || !!state.user, user: session?.user || state.user })),
+  setSession: (session) => set((state) => ({ 
+    session, 
+    token: session?.access_token || null,
+    isAuthenticated: !!session, 
+    user: session?.user || null 
+  })),
   setIsLoading: (isLoading) => set({ isLoading }),
-  logout: () => set({ user: null, session: null, isAuthenticated: false }),
+  logout: () => set({ user: null, session: null, token: null, isAuthenticated: false }),
 }));

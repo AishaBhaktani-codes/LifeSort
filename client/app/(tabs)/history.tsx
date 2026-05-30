@@ -1,7 +1,9 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useCallback } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
 import { MessageSquare, Calendar } from 'lucide-react-native';
+import { useFocusEffect } from 'expo-router';
+import { useConversation } from '../../src/hooks/useConversation';
 import {
   ScreenShell,
   FloatingHeader,
@@ -13,24 +15,19 @@ import { EmptyState } from '../../src/components/common';
 import { colors } from '../../src/constants/colors';
 import { images } from '../../src/constants/images';
 
-const PLACEHOLDER_SESSIONS = [
-  {
-    id: '1',
-    title: 'Brain Dump',
-    date: 'When you’re ready',
-    preview: 'Your past voice journals will appear here.',
-    image: images.cards.tasks,
-  },
-  {
-    id: '2',
-    title: 'Morning Check-in',
-    date: 'Scheduled flows',
-    preview: 'Review transcripts, AI replies, and extracted tasks.',
-    image: images.cards.voice,
-  },
-];
-
 export default function HistoryScreen() {
+  const { conversations, fetchConversations, loading } = useConversation();
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchConversations();
+    }, [fetchConversations])
+  );
+
+  const formatDate = (isoString: string) => {
+    const date = new Date(isoString);
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  };
   return (
     <ScreenShell header={<FloatingHeader title="LifeSort" />}>
       <View style={styles.content}>
@@ -41,38 +38,44 @@ export default function HistoryScreen() {
           subtitle="Every session is encrypted and organized for easy review."
         />
 
-        {PLACEHOLDER_SESSIONS.map((session, index) => (
-          <FadeInView key={session.id} delay={120 + index * 80}>
-            <SurfaceCard style={styles.sessionCard}>
-              <View style={styles.sessionRow}>
-                <Image
-                  source={{ uri: session.image }}
-                  style={styles.thumb}
-                  contentFit="cover"
-                />
-                <View style={styles.sessionMeta}>
-                  <View style={styles.sessionTitleRow}>
-                    <MessageSquare size={16} color={colors.light.primary} />
-                    <Text style={styles.sessionTitle}>{session.title}</Text>
+        {loading && conversations.length === 0 ? (
+          <ActivityIndicator size="large" color={colors.light.primary} style={{ marginTop: 40 }} />
+        ) : (
+          conversations.length > 0 ? (
+            conversations.map((session, index) => (
+              <FadeInView key={session.id} delay={120 + index * 80}>
+                <SurfaceCard style={styles.sessionCard}>
+                  <View style={styles.sessionRow}>
+                    <Image
+                      source={{ uri: session.flowType === 'morning_checkin' ? images.cards.voice : images.cards.tasks }}
+                      style={styles.thumb}
+                      contentFit="cover"
+                    />
+                    <View style={styles.sessionMeta}>
+                      <View style={styles.sessionTitleRow}>
+                        <MessageSquare size={16} color={colors.light.primary} />
+                        <Text style={styles.sessionTitle}>{session.title || 'Untitled Session'}</Text>
+                      </View>
+                      <View style={styles.dateRow}>
+                        <Calendar size={12} color={colors.light.textMuted} />
+                        <Text style={styles.date}>{formatDate(session.createdAt)}</Text>
+                      </View>
+                      <Text style={styles.preview} numberOfLines={2}>{session.summary}</Text>
+                    </View>
                   </View>
-                  <View style={styles.dateRow}>
-                    <Calendar size={12} color={colors.light.textMuted} />
-                    <Text style={styles.date}>{session.date}</Text>
-                  </View>
-                  <Text style={styles.preview}>{session.preview}</Text>
-                </View>
-              </View>
-            </SurfaceCard>
-          </FadeInView>
-        ))}
-
-        <FadeInView delay={320}>
-          <EmptyState
-            title="No sessions yet"
-            subtitle="Head to Voice and record your first conversation."
-            imageUri={images.hero.journal}
-          />
-        </FadeInView>
+                </SurfaceCard>
+              </FadeInView>
+            ))
+          ) : (
+            <FadeInView delay={320}>
+              <EmptyState
+                title="No sessions yet"
+                subtitle="Head to Voice and record your first conversation."
+                imageUri={images.hero.journal}
+              />
+            </FadeInView>
+          )
+        )}
       </View>
     </ScreenShell>
   );

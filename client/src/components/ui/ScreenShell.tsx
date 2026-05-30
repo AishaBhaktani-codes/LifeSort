@@ -1,11 +1,11 @@
 import React, { ReactNode } from 'react';
 import {
-  ScrollView,
   StyleSheet,
   View,
   ViewStyle,
   ScrollViewProps,
 } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../../constants/colors';
 
@@ -34,14 +34,15 @@ export function ScreenShell({
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
       {scroll ? (
-        <ScrollView
+        <Animated.ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
+          scrollEventThrottle={16}
           {...scrollProps}
         >
           {body}
-        </ScrollView>
+        </Animated.ScrollView>
       ) : (
         body
       )}
