@@ -27,9 +27,6 @@ api.interceptors.request.use(async (config) => {
   if (session?.access_token) {
     config.headers.Authorization = `Bearer ${session.access_token}`;
   }
-  if (session?.provider_token) {
-    config.headers['X-Provider-Token'] = session.provider_token;
-  }
   return config;
 });
 

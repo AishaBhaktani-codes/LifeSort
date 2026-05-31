@@ -34,7 +34,6 @@ export function useAuth() {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          scopes: 'https://www.googleapis.com/auth/calendar.events',
           redirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
         }
       });
