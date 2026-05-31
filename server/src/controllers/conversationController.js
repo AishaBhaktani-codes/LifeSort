@@ -27,9 +27,18 @@ export const uploadConversation = async (req, res, next) => {
     const aiResult = await llmOrchestrator.processConversation(transcript);
 
     // 3. Save to DB with TEE Encryption
+    const dbUser = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { encryptionSalt: true }
+    });
+
+    if (!dbUser || !dbUser.encryptionSalt) {
+      throw new Error('User encryption configuration not found. Please re-sync your profile.');
+    }
+
     const { encrypted: encryptedTranscript } = await TEEService.secureProcess(
       req.user.id, 
-      req.user.encryptionSalt, 
+      dbUser.encryptionSalt, 
       transcript, 
       (data) => data // Identity function, we just want the encryption part
     );
