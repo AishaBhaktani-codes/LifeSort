@@ -1,10 +1,20 @@
 import { useState } from 'react';
-import * as FileSystem from 'expo-file-system';
+import { Platform } from 'react-native';
 import { useConversationStore } from '../store/conversationStore';
 import { useAuthStore } from '../store/authStore';
 import { api } from '../lib/api';
 import { Conversation, ConversationUploadResponse } from '../types';
-import { Alert } from 'react-native';
+
+// Cross-platform alert that works on web and native
+const showAlert = (title: string, message: string) => {
+  if (Platform.OS === 'web') {
+    window.alert(`${title}: ${message}`);
+  } else {
+    // Dynamic import to avoid web bundling issues
+    const { Alert } = require('react-native');
+    Alert.alert(title, message);
+  }
+};
 
 export function useConversation() {
   const {
@@ -32,8 +42,7 @@ export function useConversation() {
       setConversations(response.data);
     } catch (err: any) {
       console.warn('API /conversations failed', err.message);
-      // Removed hardcoded mock conversations
-      Alert.alert('Error', 'Could not fetch your history. Please check your connection.');
+      showAlert('Error', 'Could not fetch your history. Please check your connection.');
     } finally {
       setLoading(false);
     }
@@ -48,7 +57,8 @@ export function useConversation() {
     clearActiveSession();
 
     try {
-      const token = useAuthStore.getState().token;
+      const session = useAuthStore.getState().session;
+      const token = session?.access_token;
       const apiBaseUrl = api.defaults.baseURL;
 
       if (!token) {
@@ -57,26 +67,37 @@ export function useConversation() {
 
       console.log(`Uploading audio to ${apiBaseUrl}/conversations...`);
 
-      const uploadResult = await FileSystem.uploadAsync(
-        `${apiBaseUrl}/conversations`,
-        uri,
-        {
-          fieldName: 'audio',
-          httpMethod: 'POST',
-          uploadType: 1 as any, // Bypass FileSystemUploadType vs UploadType typings mismatch
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          parameters: {
-            flowType,
-            durationSeconds: durationSeconds.toString(),
-          },
-        }
-      );
+      // Build FormData — works on both web and native
+      const formData = new FormData();
+      formData.append('flowType', flowType);
+      formData.append('durationSeconds', durationSeconds.toString());
 
-      if (uploadResult.status === 200 || uploadResult.status === 201) {
-        const responseData = JSON.parse(uploadResult.body) as ConversationUploadResponse;
-        
+      if (Platform.OS === 'web') {
+        // On web, uri is a blob URL from the MediaRecorder — fetch it and append
+        const audioBlob = await fetch(uri).then(r => r.blob());
+        formData.append('audio', audioBlob, 'recording.webm');
+      } else {
+        // On native (iOS/Android), create a file object compatible with FormData
+        const filename = uri.split('/').pop() || 'recording.m4a';
+        formData.append('audio', {
+          uri,
+          name: filename,
+          type: 'audio/m4a',
+        } as any);
+      }
+
+      const response = await fetch(`${apiBaseUrl}/conversations`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          // Do NOT set Content-Type — browser sets it with boundary for multipart
+        },
+        body: formData,
+      });
+
+      if (response.ok) {
+        const responseData: ConversationUploadResponse = await response.json();
+
         setActiveConversation(responseData.conversation);
         setActiveTranscript(responseData.transcript);
         setActiveAiResponse(responseData.aiResponse);
@@ -87,11 +108,12 @@ export function useConversation() {
         setConversations([responseData.conversation, ...conversations]);
         return true;
       } else {
-        throw new Error(`Upload failed with status code ${uploadResult.status}`);
+        const errorBody = await response.text();
+        throw new Error(`Upload failed (${response.status}): ${errorBody}`);
       }
     } catch (err: any) {
       console.error('Audio upload failed or server offline.', err.message);
-      Alert.alert('Processing Error', 'Failed to process audio with the secure server. Ensure your backend is running.');
+      showAlert('Processing Error', 'Failed to process audio with the secure server. Ensure your backend is running.');
       return false;
     } finally {
       setLoading(false);
@@ -110,7 +132,7 @@ export function useConversation() {
       return true;
     } catch (err: any) {
       console.warn('API delete failed', err.message);
-      Alert.alert('Error', 'Failed to delete session.');
+      showAlert('Error', 'Failed to delete session.');
       return false;
     } finally {
       setLoading(false);
