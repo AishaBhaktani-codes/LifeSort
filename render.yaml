@@ -2,7 +2,7 @@ services:
   - type: web
     name: lifesort-api
     env: node
-    buildCommand: npm ci && npx prisma generate && npx prisma migrate deploy
+    buildCommand: npm ci && npx prisma generate && npx prisma db push
     startCommand: npm start
     region: oregon # Or your preferred region
     plan: free # Free tier is now possible!
