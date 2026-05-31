@@ -14,6 +14,9 @@ export const config = {
   huggingface: {
     token: process.env.HF_TOKEN,
   },
+  groq: {
+    apiKey: process.env.GROQ_API_KEY,
+  },
   tee: {
     masterSecret: process.env.TEE_MASTER_SECRET, // Must be 32 bytes hex string for AES-256
   }

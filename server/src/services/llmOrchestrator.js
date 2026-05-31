@@ -1,16 +1,18 @@
-import { HfInference } from '@huggingface/inference';
+import Groq from 'groq-sdk';
 import { config } from '../config/index.js';
 import { entityExtractionPrompt, emotionAnalysisPrompt, responseGenerationPrompt } from '../prompts/index.js';
 
-const client = new HfInference(config.huggingface.token);
-const MODEL = "meta-llama/Meta-Llama-3-8B-Instruct"; // Free and fast model on HF
+const groq = new Groq({
+    apiKey: config.groq.apiKey
+});
+const MODEL = "llama3-8b-8192"; // Fast model on Groq
 
 export const llmOrchestrator = {
   
   async extractEntities(transcript) {
     const prompt = entityExtractionPrompt.replace('{{transcript}}', transcript);
     
-    const response = await client.chatCompletion({
+    const response = await groq.chat.completions.create({
       model: MODEL,
       messages: [{ role: 'system', content: prompt }],
       max_tokens: 500,
@@ -26,7 +28,7 @@ export const llmOrchestrator = {
   async analyzeEmotion(transcript) {
     const prompt = emotionAnalysisPrompt.replace('{{transcript}}', transcript);
     
-    const response = await client.chatCompletion({
+    const response = await groq.chat.completions.create({
       model: MODEL,
       messages: [{ role: 'system', content: prompt }],
       max_tokens: 200,
@@ -45,7 +47,7 @@ export const llmOrchestrator = {
       .replace('{{emotions}}', emotionData.emotions.join(', '))
       .replace('{{tasks}}', JSON.stringify(taskData.tasks, null, 2));
       
-    const response = await client.chatCompletion({
+    const response = await groq.chat.completions.create({
       model: MODEL,
       messages: [{ role: 'system', content: prompt }],
       max_tokens: 300,
