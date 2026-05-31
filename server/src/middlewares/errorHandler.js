@@ -1,4 +1,5 @@
 export const errorHandler = (err, req, res, next) => {
+  console.error('ERROR ENCOUNTERED:', err.message);
   console.error(err.stack);
 
   const statusCode = err.statusCode || 500;
@@ -8,6 +9,7 @@ export const errorHandler = (err, req, res, next) => {
     status: 'error',
     statusCode,
     message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    stack: err.stack,
+    details: err
   });
 };
