@@ -1,45 +1,29 @@
-import { pipeline, env } from '@xenova/transformers';
-import wavefile from 'wavefile';
-const { WaveFile } = wavefile;
+import { HfInference } from '@huggingface/inference';
+import { config } from '../config/index.js';
 import fs from 'fs';
 
-// Disable local models if you want to always pull from HF, or just leave default caching.
-env.allowLocalModels = false;
-
-let transcriber = null;
+const client = new HfInference(config.huggingface.token);
 
 export const transcribeAudio = async (filePath) => {
   try {
-    // Lazy load the transcriber pipeline (downloads model on first run)
-    if (!transcriber) {
-      transcriber = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny.en');
+    // Read the audio file as a buffer
+    const audioBuffer = fs.readFileSync(filePath);
+    const audioBlob = new Blob([audioBuffer]);
+
+    // Use HF Inference API for speech-to-text (runs on HF servers, not locally)
+    const result = await client.automaticSpeechRecognition({
+      model: 'openai/whisper-large-v3-turbo',
+      data: audioBlob,
+    });
+
+    if (!result || !result.text) {
+      throw new Error('Empty transcription result from Hugging Face');
     }
 
-    // Read audio file
-    const buffer = fs.readFileSync(filePath);
-    const wav = new WaveFile(buffer);
-    
-    // Whisper expects 16kHz audio
-    wav.toBitDepth('32f');
-    wav.toSampleRate(16000);
-
-    let audioData = wav.getSamples();
-    if (Array.isArray(audioData)) {
-      if (audioData.length > 1) {
-        // Merge channels if stereo
-        const SCALING_FACTOR = Math.sqrt(2);
-        for (let i = 0; i < audioData[0].length; ++i) {
-          audioData[0][i] = (SCALING_FACTOR * (audioData[0][i] + audioData[1][i])) / 2;
-        }
-      }
-      audioData = audioData[0]; // Use first channel
-    }
-
-    // Transcribe
-    const output = await transcriber(audioData);
-    return output.text;
+    console.log(`Transcribed ${result.text.length} characters from audio`);
+    return result.text;
   } catch (error) {
-    console.error('Local Whisper STT Error:', error);
-    throw new Error('Failed to transcribe audio locally');
+    console.error('HF Whisper STT Error:', error);
+    throw new Error(`Failed to transcribe audio: ${error.message}`);
   }
 };

@@ -13,7 +13,8 @@ export const uploadConversation = async (req, res, next) => {
     // Since we're using memoryStorage in Multer (for MVP simplicity without external buckets),
     // we need to temporarily write to disk for OpenAI API or switch to Buffer uploads.
     // For now, write a temp file.
-    const tempFilePath = `/tmp/${req.user.id}_${Date.now()}.m4a`;
+    const ext = req.file.originalname?.split('.').pop() || 'webm';
+    const tempFilePath = `/tmp/${req.user.id}_${Date.now()}.${ext}`;
     fs.writeFileSync(tempFilePath, req.file.buffer);
 
     // 1. Whisper STT
