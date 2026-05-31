@@ -6,8 +6,9 @@ datasource db {
 }
 
 generator client {
-  provider        = "prisma-client-js"
+  provider      = "prisma-client-js"
   previewFeatures = ["postgresqlExtensions"]
+  engineType    = "binary"
 }
 
 model User {
