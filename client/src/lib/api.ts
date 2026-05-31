@@ -4,7 +4,8 @@ import { Platform } from 'react-native';
 
 const getBaseUrl = () => {
   if (process.env.EXPO_PUBLIC_API_URL) {
-    return process.env.EXPO_PUBLIC_API_URL;
+    const url = process.env.EXPO_PUBLIC_API_URL;
+    return url.endsWith('/api') ? url : `${url.replace(/\/$/, '')}/api`;
   }
   
   if (Platform.OS === 'android') {

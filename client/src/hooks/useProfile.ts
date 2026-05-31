@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import api from '../lib/api';
+import { api } from '../lib/api';
 import { useAuthStore } from '../store/authStore';
 
 export interface UserProfile {
