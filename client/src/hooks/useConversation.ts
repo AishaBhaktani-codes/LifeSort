@@ -57,63 +57,82 @@ export function useConversation() {
     clearActiveSession();
 
     try {
-      const session = useAuthStore.getState().session;
-      const token = session?.access_token;
-      const apiBaseUrl = api.defaults.baseURL;
-
-      if (!token) {
-        throw new Error('User is not authenticated');
-      }
-
-      console.log(`Uploading audio to ${apiBaseUrl}/conversations...`);
-
-      // Build FormData — works on both web and native
-      const formData = new FormData();
-      formData.append('flowType', flowType);
-      formData.append('durationSeconds', durationSeconds.toString());
-
-      if (Platform.OS === 'web') {
-        // On web, uri is a blob URL from the MediaRecorder — fetch it and append
-        const audioBlob = await fetch(uri).then(r => r.blob());
-        formData.append('audio', audioBlob, 'recording.webm');
+      // DUMMY DATA FOR DEMO
+      console.log('Simulating secure backend processing...');
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 2500));
+      
+      const dummyId = Math.random().toString(36).substring(7);
+      const now = new Date().toISOString();
+      
+      let dummyTranscript = "";
+      let dummyAiResponse = "";
+      let dummyTasks: any[] = [];
+      
+      if (flowType === 'brain_dump') {
+        dummyTranscript = "I've been feeling so overwhelmed lately. I need to finish the quarterly report by Friday, and I keep forgetting to call mom back. Oh, and I really should book those flights for the conference in Austin before prices go up.";
+        dummyAiResponse = "It sounds like you have a lot on your plate right now, especially with the quarterly report weighing on you. I've broken down your scattered thoughts into clear tasks so you don't have to hold it all in your head. Take a deep breath—you've got this.";
+        dummyTasks = [
+          { id: `t1_${dummyId}`, userId: 'user', title: 'Finish quarterly report', priority: 'high', status: 'pending', dueDate: new Date(Date.now() + 86400000 * 3).toISOString(), people: [], createdAt: now },
+          { id: `t2_${dummyId}`, userId: 'user', title: 'Call mom back', priority: 'medium', status: 'pending', people: ['Mom'], createdAt: now },
+          { id: `t3_${dummyId}`, userId: 'user', title: 'Book flights for Austin conference', priority: 'medium', status: 'pending', people: [], createdAt: now }
+        ];
+      } else if (flowType === 'quick_vent') {
+        dummyTranscript = "I'm so frustrated with the new API changes. They completely broke our staging environment and nobody communicated it. It took me three hours to track down the issue.";
+        dummyAiResponse = "That sounds incredibly frustrating. Dealing with unannounced breaking changes is a huge drain on your time and energy. It's completely valid to feel annoyed about those lost three hours. I've noted this down—maybe it's worth bringing up team communication at the next sync.";
+        dummyTasks = [
+          { id: `t1_${dummyId}`, userId: 'user', title: 'Bring up API communication protocol at team sync', priority: 'medium', status: 'pending', people: ['Team'], createdAt: now }
+        ];
       } else {
-        // On native (iOS/Android), create a file object compatible with FormData
-        const filename = uri.split('/').pop() || 'recording.m4a';
-        formData.append('audio', {
-          uri,
-          name: filename,
-          type: 'audio/m4a',
-        } as any);
+        dummyTranscript = "Today I want to focus on just getting through the design reviews. If I can finish those and maybe hit the gym later, I'll consider it a good day.";
+        dummyAiResponse = "That's a great mindset for the day. Setting clear, manageable goals like the design reviews and prioritizing your physical health with a gym session sets a very positive tone. Let's make it a great day.";
+        dummyTasks = [
+          { id: `t1_${dummyId}`, userId: 'user', title: 'Complete design reviews', priority: 'high', status: 'pending', people: [], createdAt: now },
+          { id: `t2_${dummyId}`, userId: 'user', title: 'Go to the gym', category: 'Health', priority: 'low', status: 'pending', people: [], createdAt: now }
+        ];
       }
 
-      const response = await fetch(`${apiBaseUrl}/conversations`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          // Do NOT set Content-Type — browser sets it with boundary for multipart
+      const responseData: ConversationUploadResponse = {
+        conversation: {
+          id: dummyId,
+          userId: 'user',
+          title: `${flowType.replace('_', ' ')} Session`,
+          encryptedTranscript: 'encrypted_blob',
+          summary: dummyAiResponse.substring(0, 100) + '...',
+          flowType: flowType,
+          durationSeconds: durationSeconds,
+          overallSentiment: 0.8,
+          categories: ['Work', 'Personal'],
+          createdAt: now
         },
-        body: formData,
-      });
+        transcript: dummyTranscript,
+        aiResponse: dummyAiResponse,
+        tasks: dummyTasks,
+        mood: {
+          id: `m_${dummyId}`,
+          userId: 'user',
+          score: 0.7,
+          emotions: ['overwhelmed', 'focused'],
+          triggers: ['work', 'family'],
+          notes: 'User is dealing with a high cognitive load but remains proactive.',
+          createdAt: now
+        }
+      };
 
-      if (response.ok) {
-        const responseData: ConversationUploadResponse = await response.json();
+      setActiveConversation(responseData.conversation);
+      setActiveTranscript(responseData.transcript);
+      setActiveAiResponse(responseData.aiResponse);
+      setActiveTasks(responseData.tasks);
+      setActiveMood(responseData.mood);
 
-        setActiveConversation(responseData.conversation);
-        setActiveTranscript(responseData.transcript);
-        setActiveAiResponse(responseData.aiResponse);
-        setActiveTasks(responseData.tasks);
-        setActiveMood(responseData.mood);
+      // Prepend new conversation to list
+      setConversations([responseData.conversation, ...conversations]);
+      return true;
 
-        // Prepend new conversation to list
-        setConversations([responseData.conversation, ...conversations]);
-        return true;
-      } else {
-        const errorBody = await response.text();
-        throw new Error(`Upload failed (${response.status}): ${errorBody}`);
-      }
     } catch (err: any) {
       console.error('Audio upload failed or server offline.', err.message);
-      showAlert('Processing Error', 'Failed to process audio with the secure server. Ensure your backend is running.');
+      showAlert('Processing Error', 'Failed to process audio. Please try again.');
       return false;
     } finally {
       setLoading(false);
