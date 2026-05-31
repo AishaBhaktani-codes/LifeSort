@@ -5,7 +5,7 @@ import { entityExtractionPrompt, emotionAnalysisPrompt, responseGenerationPrompt
 const groq = new Groq({
     apiKey: config.groq.apiKey
 });
-const MODEL = "llama3-8b-8192"; // Fast model on Groq
+const MODEL = "llama-3.1-8b-instant"; // Fast model on Groq
 
 export const llmOrchestrator = {
   
